@@ -1,3 +1,11 @@
+# BNFC specific files
+*Latte*
+!Latte.cf
+
+## Exclude *.hs files
+!*.hs
+
+# Github template
 dist
 dist-*
 cabal-dev
