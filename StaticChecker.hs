@@ -13,26 +13,26 @@ import SCTypes
 
 type SC = ExceptT String (State SCState)
 
-getVarT :: Show a => a -> Ident -> SC VarT
+getVarT :: BNFC'Position -> Ident -> SC VarT
 getVarT pos ident = do
     state <- get
     case Map.lookup ident (vEnv state) of
         Just t -> return t
         Nothing -> throwSCError pos $ UndeclaredVarError ident
 
-getFunT :: Show a => a -> Ident -> SC FunT
+getFunT :: BNFC'Position -> Ident -> SC FunT
 getFunT pos ident = do
     state <- get
     case Map.lookup ident (fEnv state) of
         Just t -> return t
         Nothing -> throwSCError pos $ UndeclaredFunError ident
 
-{- prettifyPos :: Show a => a -> String
+prettifyPos :: BNFC'Position -> String
 prettifyPos (Just (l, c)) = "line: " ++ show l ++ ", col: " ++ show c
-prettifyPos pos = show pos -}
+prettifyPos pos = show pos
 
-throwSCError :: Show a => a -> SCError -> SC b
-throwSCError pos err = throwError $ "Static check error found at " ++ show pos ++ ": " ++ show err
+throwSCError :: BNFC'Position -> SCError -> SC b
+throwSCError pos err = throwError $ "Static check error found at " ++ prettifyPos pos ++ ": " ++ show err
 
 evalExp :: Expr -> SC (VarT, Maybe VarV)
 evalExp (EVar pos ident) = do
@@ -118,7 +118,7 @@ evalExp (EOr pos lhs rhs) = do
         then return (BoolT, booleanBinaryOp (||) lhsV rhsV)
         else throwSCError pos $ OrParamsTypeMismatchError lhsT rhsT
 
-assertArgsT :: Show a => a -> ArgsT -> [Expr] -> SC ()
+assertArgsT :: BNFC'Position -> ArgsT -> [Expr] -> SC ()
 assertArgsT pos [] [] = return ()
 assertArgsT pos (tHead : tTail) (eHead : eTail) = do
     _ <- assertArgsT pos tTail eTail
@@ -228,7 +228,7 @@ sandbox m = do
     put stateBak
     return res
 
-storeVar :: Show a => a -> Ident -> VarT -> SC ()
+storeVar :: BNFC'Position -> Ident -> VarT -> SC ()
 storeVar pos ident t = do
     state <- get
     when (Set.member ident (localStore state)) $
