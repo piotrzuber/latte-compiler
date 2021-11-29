@@ -1,6 +1,13 @@
+# Test output
+tests_*
+
+# Binaries
+Main
+
 # BNFC specific files
 *Latte*
 !Latte.cf
+!lattests
 
 ## Exclude *.hs files
 !*.hs
