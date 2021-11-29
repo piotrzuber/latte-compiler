@@ -22,15 +22,19 @@ getVarT pos ident = do
 
 getFunT :: Show a => a -> Ident -> SC FunT
 getFunT pos ident = do
-    env <- get
-    case Map.lookup ident (fEnv env) of
+    state <- get
+    case Map.lookup ident (fEnv state) of
         Just t -> return t
         Nothing -> throwSCError pos $ UndeclaredFunError ident
+
+{- prettifyPos :: Show a => a -> String
+prettifyPos (Just (l, c)) = "line: " ++ show l ++ ", col: " ++ show c
+prettifyPos pos = show pos -}
 
 throwSCError :: Show a => a -> SCError -> SC b
 throwSCError pos err = throwError $ "Static check error found at " ++ show pos ++ ": " ++ show err
 
-evalExp :: Show a => Expr' a -> SC (VarT, Maybe VarV)
+evalExp :: Expr -> SC (VarT, Maybe VarV)
 evalExp (EVar pos ident) = do
     t <- getVarT pos ident
     return (t, Nothing)
@@ -44,13 +48,13 @@ evalExp (EApp pos ident args) = do
 evalExp (EString _ s) = return (StrT, Just (StrV s))
 evalExp (Neg pos exp) = do
     (expT, expV) <- evalExp exp
-    unless (expT == IntT) $ throwError pos InvalidIntNegError
+    unless (expT == IntT) $ throwSCError pos InvalidIntNegError
     case expV of
         Just (IntV i) -> return (IntT, Just (IntV (negate i)))
         _ -> return (IntT, Nothing)
 evalExp (Not pos exp) = do
     (expT, expV) <- evalExp exp
-    unless (expT == BoolT) $ throwError pos InvalidBoolNegError
+    unless (expT == BoolT) $ throwSCError pos InvalidBoolNegError
     case expV of
         Just (BoolV b) -> return (BoolT, Just (BoolV (not b)))
         _ -> return (BoolT, Nothing)
@@ -83,7 +87,7 @@ evalExp (EAdd _ lhs op rhs) = case op of
             IntT -> return (IntT, integerBinaryOp (+) lhsV rhsV)
             StrT -> case (lhsV, rhsV) of 
                 (Just (StrV ls), Just (StrV rs)) -> return (StrT, Just (StrV (ls ++ rs)))
-                _ -> throwSCError pos $ PlusParamsTypeMismatchError lhsT rhsT -- not possible due to implementation of VarV
+                _ -> return (StrT, Nothing)
             _ -> throwSCError pos $ PlusParamsTypeMismatchError lhsT rhsT
 evalExp (ERel _ lhs op rhs) = do
     let pos = hasPosition op
@@ -114,8 +118,8 @@ evalExp (EOr pos lhs rhs) = do
         then return (BoolT, booleanBinaryOp (||) lhsV rhsV)
         else throwSCError pos $ OrParamsTypeMismatchError lhsT rhsT
 
-assertArgsT :: Show a => a -> ArgsT -> [Expr' a] -> SC ()
-assertArgsT _ [] [] = return ()
+assertArgsT :: Show a => a -> ArgsT -> [Expr] -> SC ()
+assertArgsT pos [] [] = return ()
 assertArgsT pos (tHead : tTail) (eHead : eTail) = do
     _ <- assertArgsT pos tTail eTail
     (eType, _) <- evalExp eHead
@@ -142,7 +146,7 @@ booleanBinaryOp op lhs rhs = case (lhs, rhs) of
     (Just (BoolV b1), Just (BoolV b2)) -> Just (BoolV (op b1 b2))
     _ -> Nothing
 
-evalStmt :: Show a => Stmt' a -> SC ()
+evalStmt :: Stmt -> SC ()
 evalStmt (Empty _) = return ()
 evalStmt (BStmt _ block) = do
     ret <- sandbox $ do
@@ -151,11 +155,11 @@ evalStmt (BStmt _ block) = do
     when ret $ modify (\s -> s {returned = True})
 evalStmt (Decl pos t items) = evalItemList (getVarTFromType t) items
     where 
-        evalItemList :: Show a => VarT -> [Item' a] -> SC ()
+        evalItemList :: VarT -> [Item] -> SC ()
         evalItemList t [] = return ()
         evalItemList t (iHead : iTail) = evalItem t iHead >> evalItemList t iTail
             where
-                evalItem :: VarT -> Item' a -> SC ()
+                evalItem :: VarT -> Item -> SC ()
                 evalItem t (NoInit pos ident) = storeVar pos ident t
                 evalItem t (Init pos ident exp) = do
                     (expT, _) <- evalExp exp
@@ -209,10 +213,10 @@ evalStmt (While pos exp stmt) = do
     when ((expV == Just (BoolV True)) && ret) $ modify (\s -> s {returned = True})
 evalStmt (SExp pos exp) = void $ evalExp exp
 
-evalBlockStmt :: Show a => Block' a -> SC ()
+evalBlockStmt :: Block -> SC ()
 evalBlockStmt (Block _ stmts) = evalStmtList stmts
 
-evalStmtList :: Show a => [Stmt' a] -> SC ()
+evalStmtList :: [Stmt] -> SC ()
 evalStmtList [] = return ()
 evalStmtList (sHead : sTail) = evalStmt sHead >> evalStmtList sTail
 
@@ -233,11 +237,11 @@ storeVar pos ident t = do
         throwSCError pos $ VarTypeMismatchError
     put $ SCState (fEnv state) (Set.insert ident (localStore state)) (Map.insert ident t (vEnv state)) (retT state) (returned state)
 
-evalTopDefList :: Show a => [TopDef' a] -> SC ()
+evalTopDefList :: [TopDef] -> SC ()
 evalTopDefList [] = return ()
 evalTopDefList (dHead : dTail) = evalTopDef dHead >> evalTopDefList dTail
     where
-        evalTopDef :: TopDef' a -> SC ()
+        evalTopDef :: TopDef -> SC ()
         evalTopDef (FnDef pos t ident args block) = do
             let retT = getVarTFromType t
             sandbox $ do
@@ -247,11 +251,11 @@ evalTopDefList (dHead : dTail) = evalTopDef dHead >> evalTopDefList dTail
                 returned <- gets returned
                 when (VoidT /= retT && not returned) $ throwSCError pos $ NoReturnError ident
 
-evalArgs :: Show a => [Arg' a] -> SC ()
+evalArgs :: [Arg] -> SC ()
 evalArgs [] = return ()
 evalArgs (aHead : aTail) = evalArg aHead >> evalArgs aTail
     where
-        evalArg :: Show a => Arg' a -> SC ()
+        evalArg :: Arg -> SC ()
         evalArg (Arg pos t ident) = do
             let varT = getVarTFromType t
             storeVar pos ident varT
@@ -274,11 +278,11 @@ initBuiltins :: [(FunId, FunT)] -> SC ()
 initBuiltins [] = return ()
 initBuiltins ((funId, funT) : bTail) = storeFun funId funT >> initBuiltins bTail
 
-evalFunDeclList :: Show a => [TopDef' a] -> SC ()
+evalFunDeclList :: [TopDef] -> SC ()
 evalFunDeclList [] = return ()
 evalFunDeclList (dHead : dTail) = evalFunDecl dHead >> evalFunDeclList dTail
     where
-        evalFunDecl :: Show a => TopDef' a -> SC ()
+        evalFunDecl :: TopDef -> SC ()
         evalFunDecl (FnDef pos t funId args block) = do
             env <- get
             if Map.member funId (fEnv env)
@@ -291,7 +295,7 @@ evalFunDeclList (dHead : dTail) = evalFunDecl dHead >> evalFunDeclList dTail
                         when (argsT /= []) $ throwSCError pos NonEmptyMainArgsError
                     storeFun funId (retT, argsT)
 
-evalProgram :: Program' a -> SC ()
+evalProgram :: Program -> SC ()
 evalProgram (Program pos defList) = do
     initBuiltins builtins
     evalFunDeclList defList
@@ -305,7 +309,7 @@ exitWithErrorMsg msg = do
     hPutStrLn stderr msg
     exitFailure
 
-runEvaluation :: Program' a -> IO ()
+runEvaluation :: Program -> IO ()
 runEvaluation p = do
     let initState = SCState {
         fEnv = Map.empty,

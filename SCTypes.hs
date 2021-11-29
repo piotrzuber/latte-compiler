@@ -15,7 +15,7 @@ instance Show VarT where
     show VoidT = "void"
     show _ = "None"
     
-getVarTFromType :: Show a => Type' a -> VarT
+getVarTFromType :: Type -> VarT
 getVarTFromType (Int _) = IntT
 getVarTFromType (Str _) = StrT
 getVarTFromType (Bool _) = BoolT
@@ -26,11 +26,11 @@ type ArgsT = [VarT]
 type RetT = VarT
 type FunT = (RetT, ArgsT)
 
-data VarV = BoolV Bool | IntV Integer | StrV String | VoidV
+data VarV = BoolV Bool | IntV Integer | StrV String | VoidV deriving Eq
 instance Show VarV where
-    show (BoolV v) = show v
-    show (IntV v) = show v
-    show (StrV v) = v
+    show (BoolV v) = "Bool " ++ show v
+    show (IntV v) = "Int " ++ show v
+    show (StrV v) = "Str " ++ v
     show VoidV = error "Attempt to print void value"
 
 type FunId = Ident
@@ -84,6 +84,7 @@ data SCError
     | VarTypeMismatchError
     | VoidRetNonVoidFunError VarT
     | ZeroDivisionError
+    | DebugError (Maybe VarV) (Maybe VarV)
 
 instance Show SCError where
     show (AndParamsTypeMismatchError g1 g2) = "Both conjunction parameters have to be boolean, got: " ++ show g1 ++ ", " ++ show g2
@@ -113,3 +114,4 @@ instance Show SCError where
     show VarTypeMismatchError = "Invalid variable type"
     show (VoidRetNonVoidFunError g) = "Void return from " ++ show g ++ " type function"
     show ZeroDivisionError = "Division by zero"
+    show (DebugError v1 v2) = "DEBUG!!!! 1st: " ++ show v1 ++ " 2nd: " ++ show v2
