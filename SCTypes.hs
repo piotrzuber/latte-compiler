@@ -32,7 +32,6 @@ instance Show VarV where
     show (IntV v) = show v
     show (StrV v) = v
     show VoidV = error "Attempt to print void value"
-    show _ = ""
 
 type FunId = Ident
 type VarId = Ident

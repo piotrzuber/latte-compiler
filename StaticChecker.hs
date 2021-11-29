@@ -1,63 +1,64 @@
 module StaticChecker where
 
+import Control.Monad
+import Control.Monad.Except
+import Control.Monad.State
 import qualified Data.Map as Map
 import qualified Data.Set as Set
+import System.Exit
+import System.IO
 
 import AbsLatte
 import SCTypes
 
 type SC = ExceptT String (State SCState)
 
-getVarT :: a -> Ident -> SC VarT
+getVarT :: Show a => a -> Ident -> SC VarT
 getVarT pos ident = do
     state <- get
-    resT <- Map.lookup ident (vEnv state)
-    case resT of
+    case Map.lookup ident (vEnv state) of
         Just t -> return t
         Nothing -> throwSCError pos $ UndeclaredVarError ident
 
-getFunT :: a -> Ident -> SC FunT
+getFunT :: Show a => a -> Ident -> SC FunT
 getFunT pos ident = do
     env <- get
     case Map.lookup ident (fEnv env) of
         Just t -> return t
-        Nothing -> throwSCErrorpos $ UndeclaredFunError ident
+        Nothing -> throwSCError pos $ UndeclaredFunError ident
 
-throwSCError :: a -> SCError -> SC b
+throwSCError :: Show a => a -> SCError -> SC b
 throwSCError pos err = throwError $ "Static check error found at " ++ show pos ++ ": " ++ show err
 
-evalExp :: Expr a -> SC (VarT, Maybe VarV)
+evalExp :: Show a => Expr' a -> SC (VarT, Maybe VarV)
 evalExp (EVar pos ident) = do
     t <- getVarT pos ident
     return (t, Nothing)
 evalExp (ELitInt _ i) = return (IntT, Just (IntV i))
 evalExp (ELitTrue _) = return (BoolT, Just (BoolV True))
-evalExp(ELitFalse _) = return (BoolT, Just (Boolv False))
+evalExp(ELitFalse _) = return (BoolT, Just (BoolV False))
 evalExp (EApp pos ident args) = do
-    (argsT, retT) <- getFunT pos ident
+    (retT, argsT) <- getFunT pos ident
     assertArgsT pos argsT args
     return (retT, Nothing)
 evalExp (EString _ s) = return (StrT, Just (StrV s))
 evalExp (Neg pos exp) = do
     (expT, expV) <- evalExp exp
     unless (expT == IntT) $ throwError pos InvalidIntNegError
-    val <- case expV of
-        Just (IntV i) -> Just (IntV (negate i))
-        _ -> Nothing
-    return (IntT, val)
+    case expV of
+        Just (IntV i) -> return (IntT, Just (IntV (negate i)))
+        _ -> return (IntT, Nothing)
 evalExp (Not pos exp) = do
     (expT, expV) <- evalExp exp
-    if expT == BoolT
-        then let val = case expV of
-            Just (BoolV b) -> Just (BoolV (not b))
-            _ -> Nothing
-            in return (BoolT, val)
-        else throwSCError pos InvalidBoolNegError
+    unless (expT == BoolT) $ throwError pos InvalidBoolNegError
+    case expV of
+        Just (BoolV b) -> return (BoolT, Just (BoolV (not b)))
+        _ -> return (BoolT, Nothing)
 evalExp (EMul _ lhs op rhs) = do
     let pos = hasPosition op
     (lhsT, lhsV) <- evalExp lhs
     (rhsT, rhsV) <- evalExp rhs
-    unless (lhsT == IntT and rhsT == IntT) $ throwSCError pos $ NonIntegerMulParamError lhsT rhsT
+    unless (lhsT == IntT && rhsT == IntT) $ throwSCError pos $ NonIntegerMulParamError lhsT rhsT
     case op of
         Times _ -> return (IntT, integerBinaryOp (*) lhsV rhsV)
         Div pos -> case rhsV of
@@ -81,10 +82,10 @@ evalExp (EAdd _ lhs op rhs) = case op of
         case lhsT of
             IntT -> return (IntT, integerBinaryOp (+) lhsV rhsV)
             StrT -> case (lhsV, rhsV) of 
-                (Just (StrV ls), Just (StrV rs)) -> Just (StrV (ls ++ rs))
-                _ -> Nothing
-            _ -> throwSCError pos PlusParamsTypeMismatchError
-evalExp (ERel _ lhs op rhs) -> do
+                (Just (StrV ls), Just (StrV rs)) -> return (StrT, Just (StrV (ls ++ rs)))
+                _ -> throwSCError pos $ PlusParamsTypeMismatchError lhsT rhsT -- not possible due to implementation of VarV
+            _ -> throwSCError pos $ PlusParamsTypeMismatchError lhsT rhsT
+evalExp (ERel _ lhs op rhs) = do
     let pos = hasPosition op
     (lhsT, lhsV) <- evalExp lhs
     (rhsT, rhsV) <- evalExp rhs
@@ -96,24 +97,24 @@ evalExp (ERel _ lhs op rhs) -> do
             unless (lhsT == IntT && rhsT == lhsT) $
                 throwSCError pos $ RelParamsTypeMismatchError lhsT rhsT
             case op of
-                LTH _ -> return (BoolT, integerRelOp (<) lhsV, rhsV)
-                LE _ -> return (BoolT, integerRelOp (<=) lhsV, rhsV)
-                GTH _ -> return (BoolT, integerRelOp (>) lhsV, rhsV)
-                GE _ -> return (BoolT, integerRelOp (<=) lhsV, rhsV)
-evalExp (EAnd pos lhs rhs) -> do
+                LTH _ -> return (BoolT, integerRelOp (<) lhsV rhsV)
+                LE _ -> return (BoolT, integerRelOp (<=) lhsV rhsV)
+                GTH _ -> return (BoolT, integerRelOp (>) lhsV rhsV)
+                GE _ -> return (BoolT, integerRelOp (<=) lhsV rhsV)
+evalExp (EAnd pos lhs rhs) = do
     (lhsT, lhsV) <- evalExp lhs
     (rhsT, rhsV) <- evalExp rhs
     if (lhsT == BoolT && rhsT == lhsT) 
         then return (BoolT, booleanBinaryOp (&&) lhsV rhsV)
         else throwSCError pos $ AndParamsTypeMismatchError lhsT rhsT
-evalExp (EOr pos lhs rhs) -> do
+evalExp (EOr pos lhs rhs) = do
     (lhsT, lhsV) <- evalExp lhs
     (rhsT, rhsV) <- evalExp rhs
     if (lhsT == BoolT && rhsT == lhsT)
         then return (BoolT, booleanBinaryOp (||) lhsV rhsV)
         else throwSCError pos $ OrParamsTypeMismatchError lhsT rhsT
 
-assertArgsT :: a -> ArgsT -> [Expr a] -> SC ()
+assertArgsT :: Show a => a -> ArgsT -> [Expr' a] -> SC ()
 assertArgsT _ [] [] = return ()
 assertArgsT pos (tHead : tTail) (eHead : eTail) = do
     _ <- assertArgsT pos tTail eTail
@@ -131,11 +132,9 @@ integerRelOp op lhs rhs = case (lhs, rhs) of
     (Just (IntV i1), Just (IntV i2)) -> Just (BoolV (op i1 i2))
     _ -> Nothing
 
-genericRelOp :: GenRelFun -> Maybe VarV -> Maybe VarV -> MaybeVarV
+genericRelOp :: GenRelFun -> Maybe VarV -> Maybe VarV -> Maybe VarV
 genericRelOp op lhs rhs = case (lhs, rhs) of
-    (Just (BoolV b1), Just (BoolV b2)) -> Just (BoolV (op b1 b2))
-    (Just (IntV i1), Just (IntV i2)) -> Just (IntV (op i1 i2))
-    (Just (StrV s1), Just (StrV s2)) -> Just (StrV (op s1 s2))
+    (Just _, Just _) -> Just (BoolV (op lhs rhs))
     _ -> Nothing
 
 booleanBinaryOp :: BoolBinFun -> Maybe VarV -> Maybe VarV -> Maybe VarV
@@ -143,25 +142,25 @@ booleanBinaryOp op lhs rhs = case (lhs, rhs) of
     (Just (BoolV b1), Just (BoolV b2)) -> Just (BoolV (op b1 b2))
     _ -> Nothing
 
-evalStmt :: Stmt a -> SC ()
+evalStmt :: Show a => Stmt' a -> SC ()
 evalStmt (Empty _) = return ()
 evalStmt (BStmt _ block) = do
     ret <- sandbox $ do
         evalBlockStmt block
-        gets ret
+        gets returned
     when ret $ modify (\s -> s {returned = True})
-evalStmt (Decl pos t items) = evalItemList (getVarT t) items
+evalStmt (Decl pos t items) = evalItemList (getVarTFromType t) items
     where 
-        evalItemList :: VarT -> [Item a] -> SC ()
+        evalItemList :: Show a => VarT -> [Item' a] -> SC ()
         evalItemList t [] = return ()
         evalItemList t (iHead : iTail) = evalItem t iHead >> evalItemList t iTail
-        where
-            evalItem :: VarT -> Item a -> SC ()
-            evalItem t (NoInit pos ident) = storeVar pos ident t
-            evalItem t (Init pos ident exp) = do
-                (expT, _) <- evalExp exp
-                when (t /= expT) $ throwSCError pos $ ItemInitTypeMismatchError t expT
-                storeVar pos ident t
+            where
+                evalItem :: VarT -> Item' a -> SC ()
+                evalItem t (NoInit pos ident) = storeVar pos ident t
+                evalItem t (Init pos ident exp) = do
+                    (expT, _) <- evalExp exp
+                    when (t /= expT) $ throwSCError pos $ ItemInitTypeMismatchError t expT
+                    storeVar pos ident t
 evalStmt (Ass pos ident exp) = do 
     varT <- getVarT pos ident
     (expT, _) <- evalExp exp
@@ -207,15 +206,15 @@ evalStmt (While pos exp stmt) = do
     ret <- sandbox $ do
         evalStmt stmt
         gets returned
-    when ((expV == Just (BoolV True)) && ret) $ setReturned True
+    when ((expV == Just (BoolV True)) && ret) $ modify (\s -> s {returned = True})
 evalStmt (SExp pos exp) = void $ evalExp exp
 
-evalBlockStmt :: Block a -> SC ()
+evalBlockStmt :: Show a => Block' a -> SC ()
 evalBlockStmt (Block _ stmts) = evalStmtList stmts
 
-evalStmtList :: [Stmt a] -> SC ()
+evalStmtList :: Show a => [Stmt' a] -> SC ()
 evalStmtList [] = return ()
-evalStmtList (sHead : sTail) -> evalStmt sHead >> evalStmtList sTail
+evalStmtList (sHead : sTail) = evalStmt sHead >> evalStmtList sTail
 
 sandbox :: SC a -> SC a
 sandbox m = do
@@ -225,7 +224,7 @@ sandbox m = do
     put stateBak
     return res
 
-storeVar :: a -> Ident -> VarT -> SC ()
+storeVar :: Show a => a -> Ident -> VarT -> SC ()
 storeVar pos ident t = do
     state <- get
     when (Set.member ident (localStore state)) $
@@ -234,28 +233,28 @@ storeVar pos ident t = do
         throwSCError pos $ VarTypeMismatchError
     put $ SCState (fEnv state) (Set.insert ident (localStore state)) (Map.insert ident t (vEnv state)) (retT state) (returned state)
 
-evalTopDefList :: [TopDef a] -> SC ()
+evalTopDefList :: Show a => [TopDef' a] -> SC ()
 evalTopDefList [] = return ()
 evalTopDefList (dHead : dTail) = evalTopDef dHead >> evalTopDefList dTail
     where
+        evalTopDef :: TopDef' a -> SC ()
         evalTopDef (FnDef pos t ident args block) = do
             let retT = getVarTFromType t
             sandbox $ do
-                modify (\s -> s {returnType = retT})
+                modify (\s -> s {retT = retT})
                 evalArgs args
                 evalBlockStmt block
                 returned <- gets returned
-                when (VoidT /= retT && not returned) $
-                    throwSCError $ NoReturnError ident
+                when (VoidT /= retT && not returned) $ throwSCError pos $ NoReturnError ident
 
-evalArgs :: [Arg a] -> SC ()
+evalArgs :: Show a => [Arg' a] -> SC ()
 evalArgs [] = return ()
 evalArgs (aHead : aTail) = evalArg aHead >> evalArgs aTail
     where
-        evalArg :: Arg a -> SC ()
+        evalArg :: Show a => Arg' a -> SC ()
         evalArg (Arg pos t ident) = do
             let varT = getVarTFromType t
-            storeVar pos ident t
+            storeVar pos ident varT
 
 storeFun :: FunId -> FunT -> SC ()
 storeFun funId funT = do
@@ -264,22 +263,22 @@ storeFun funId funT = do
 
 builtins :: [(FunId, FunT)]
 builtins = [
-    ((Ident "printInt"), (VoidT, [IntT])),
-    ((Ident "printString"), (VoidT, [StrT])),
-    ((Ident "error"), (VoidT, [])),
-    ((Ident "readInt"), (IntT, [])),
-    ((Ident "readString"), (StrT, []))
-]
+        ((Ident "printInt"), (VoidT, [IntT])),
+        ((Ident "printString"), (VoidT, [StrT])),
+        ((Ident "error"), (VoidT, [])),
+        ((Ident "readInt"), (IntT, [])),
+        ((Ident "readString"), (StrT, []))
+    ]
 
 initBuiltins :: [(FunId, FunT)] -> SC ()
 initBuiltins [] = return ()
 initBuiltins ((funId, funT) : bTail) = storeFun funId funT >> initBuiltins bTail
 
-evalFunDeclList :: [TopDef a] -> SC ()
+evalFunDeclList :: Show a => [TopDef' a] -> SC ()
 evalFunDeclList [] = return ()
 evalFunDeclList (dHead : dTail) = evalFunDecl dHead >> evalFunDeclList dTail
     where
-        evalFunDecl :: TopDef a -> SC ()
+        evalFunDecl :: Show a => TopDef' a -> SC ()
         evalFunDecl (FnDef pos t funId args block) = do
             env <- get
             if Map.member funId (fEnv env)
@@ -292,7 +291,7 @@ evalFunDeclList (dHead : dTail) = evalFunDecl dHead >> evalFunDeclList dTail
                         when (argsT /= []) $ throwSCError pos NonEmptyMainArgsError
                     storeFun funId (retT, argsT)
 
-evalProgram :: Program a -> SC ()
+evalProgram :: Program' a -> SC ()
 evalProgram (Program pos defList) = do
     initBuiltins builtins
     evalFunDeclList defList
@@ -306,7 +305,7 @@ exitWithErrorMsg msg = do
     hPutStrLn stderr msg
     exitFailure
 
-runEvaluation :: Program a -> IO ()
+runEvaluation :: Program' a -> IO ()
 runEvaluation p = do
     let initState = SCState {
         fEnv = Map.empty,
