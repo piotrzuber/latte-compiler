@@ -305,6 +305,7 @@ evalProgram (Program pos defList) = do
 
 exitWithErrorMsg :: String -> IO ()
 exitWithErrorMsg msg = do
+    hPutStrLn stderr "ERROR"
     hPutStrLn stderr "Static check finished with errors"
     hPutStrLn stderr msg
     exitFailure
@@ -320,4 +321,4 @@ runEvaluation p = do
     }
     case evalState (runExceptT $ evalProgram p) initState of
         Left e -> exitWithErrorMsg e
-        _ -> hPutStrLn stderr "Static check finished successfully"
+        _ -> hPutStrLn stderr "OK"
