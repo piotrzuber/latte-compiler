@@ -19,7 +19,7 @@ with open('tests.good', 'a') as out:
         if name.endswith('.lat'):
             counter += 1
             print(path)
-            test = subprocess.run(['./latc', path], 
+            test = subprocess.run(['./latc_x86', path], 
                                   text=True, 
                                   capture_output=True)
             serr = test.stderr

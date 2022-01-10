@@ -2,7 +2,7 @@
 tests_*
 
 # Binaries
-latc
+latc_x86
 
 # BNFC specific files
 *Latte*

@@ -21,7 +21,16 @@ f:
     pushl %ebp
     movl %esp, %ebp
     subl $0, %esp
+    pushl 8(%ebp)
+    pushl 12(%ebp)
+    popl %eax
+    cmpl %eax, 0(%esp)
+    jle L3
     pushl $1
+    jmp L4
+L3:
+    pushl $0
+L4:
     popl %eax
     testl %eax, %eax
     jnz L0

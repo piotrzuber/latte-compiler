@@ -2,6 +2,7 @@
 
 GHC        = ghc
 SOURCE     = src
+LIB		   = lib
 
 # List of goals not corresponding to file names.
 
@@ -14,7 +15,7 @@ all : latc
 # Rules
 
 latc : 
-	cd ${SOURCE} && ${GHC} ${GHC_OPTS} Main -o ../latc && cd ..
+	cd lib && make && cd .. && cd ${SOURCE} && ${GHC} ${GHC_OPTS} Main -o ../latc_x86 && cd ..
 
 tests:
 	./test_bad.sh; ./test_good.sh
