@@ -32,7 +32,7 @@ main:
     pushl -4(%ebp)
     call printInt
     popl %ebx
-L1:
+L0:
     pushl -8(%ebp)
     pushl -12(%ebp)
     popl %eax
@@ -45,9 +45,9 @@ L3:
 L4:
     popl %eax
     testl %eax, %eax
-    jnz L0
+    jnz L1
     jmp L2
-L0:
+L1:
     pushl -8(%ebp)
     call printInt
     popl %ebx
@@ -73,7 +73,7 @@ L0:
     popl %eax
     popl %ebx
     movl %eax, (%ebx)
-    jmp L1
+    jmp L0
 L2:
     pushl $0
     popl %eax

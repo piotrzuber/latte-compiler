@@ -135,16 +135,16 @@ printBool:
     pushl 8(%ebp)
     popl %eax
     testl %eax, %eax
-    jnz L5
-    jmp L4
-L5:
+    jnz L4
+    jmp L5
+L4:
     pushl $LStr3
     call printString
     popl %ebx
     leave
     ret
     jmp L6
-L4:
+L5:
     pushl $LStr4
     call printString
     popl %ebx

@@ -17,13 +17,13 @@ L2:
 L3:
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     pushl $42
     call printInt
     popl %ebx
-L0:
+L1:
     pushl $0
     popl %eax
     leave

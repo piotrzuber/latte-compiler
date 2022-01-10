@@ -25,7 +25,7 @@ L5:
     popl %eax
     testl %eax, %eax
     jnz L3
-    jmp L0
+    jmp L1
 L3:
     pushl $4
     pushl $2
@@ -40,19 +40,19 @@ L8:
     popl %eax
     testl %eax, %eax
     jnz L6
-    jmp L0
+    jmp L1
 L6:
     pushl $1
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     pushl $1
     call printBool
     popl %ebx
     jmp L2
-L0:
+L1:
     pushl $LStr0
     call printString
     popl %ebx
@@ -69,7 +69,7 @@ L13:
 L14:
     popl %eax
     testl %eax, %eax
-    jnz L10
+    jnz L9
     jmp L12
 L12:
     pushl $1
@@ -78,12 +78,12 @@ L12:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L10
-    jmp L9
-L10:
+    jnz L9
+    jmp L10
+L9:
     pushl $1
     jmp L11
-L9:
+L10:
     pushl $0
 L11:
     call printBool
@@ -104,7 +104,7 @@ L20:
     popl %eax
     testl %eax, %eax
     jnz L18
-    jmp L15
+    jmp L16
 L18:
     pushl $2
     call dontCallMe
@@ -112,12 +112,12 @@ L18:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L16
-    jmp L15
-L16:
+    jnz L15
+    jmp L16
+L15:
     pushl $1
     jmp L17
-L15:
+L16:
     pushl $0
 L17:
     call printBool
@@ -135,18 +135,18 @@ L26:
     popl %eax
     testl %eax, %eax
     jnz L24
-    jmp L21
+    jmp L22
 L24:
     pushl $1
     pushl $0
     popl %eax
     testl %eax, %eax
-    jnz L28
-    jmp L29
-L29:
+    jnz L29
+    jmp L28
+L28:
     pushl $1
     jmp L30
-L28:
+L29:
     pushl $0
 L30:
     popl %eax
@@ -160,17 +160,17 @@ L32:
     popl %eax
     testl %eax, %eax
     jnz L27
-    jmp L21
+    jmp L22
 L27:
     pushl $1
     popl %eax
     testl %eax, %eax
-    jnz L22
-    jmp L21
-L22:
+    jnz L21
+    jmp L22
+L21:
     pushl $1
     jmp L23
-L21:
+L22:
     pushl $0
 L23:
     call printBool
@@ -229,14 +229,14 @@ printBool:
     pushl 8(%ebp)
     popl %eax
     testl %eax, %eax
-    jnz L34
-    jmp L33
-L34:
+    jnz L33
+    jmp L34
+L33:
     pushl $LStr1
     call printString
     popl %ebx
     jmp L35
-L33:
+L34:
     pushl $LStr2
     call printString
     popl %ebx
@@ -251,7 +251,7 @@ implies:
     popl %eax
     testl %eax, %eax
     jnz L39
-    jmp L37
+    jmp L36
 L39:
     pushl 12(%ebp)
     pushl 8(%ebp)
@@ -265,12 +265,12 @@ L40:
 L41:
     popl %eax
     testl %eax, %eax
-    jnz L37
-    jmp L36
-L37:
+    jnz L36
+    jmp L37
+L36:
     pushl $1
     jmp L38
-L36:
+L37:
     pushl $0
 L38:
     popl %eax

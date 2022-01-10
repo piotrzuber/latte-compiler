@@ -27,7 +27,7 @@ main:
     popl %eax
     testl %eax, %eax
     jnz L3
-    jmp L0
+    jmp L1
 L3:
     pushl $0
     call test
@@ -35,12 +35,12 @@ L3:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     pushl $1
     jmp L2
-L0:
+L1:
     pushl $0
 L2:
     call printBool
@@ -55,7 +55,7 @@ L2:
     popl %eax
     testl %eax, %eax
     jnz L7
-    jmp L4
+    jmp L5
 L7:
     pushl $1
     call test
@@ -63,12 +63,12 @@ L7:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L5
-    jmp L4
-L5:
+    jnz L4
+    jmp L5
+L4:
     pushl $1
     jmp L6
-L4:
+L5:
     pushl $0
 L6:
     call printBool
@@ -80,7 +80,7 @@ L6:
     popl %eax
     testl %eax, %eax
     jnz L11
-    jmp L8
+    jmp L9
 L11:
     pushl $5
     popl %eax
@@ -91,12 +91,12 @@ L11:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L9
-    jmp L8
-L9:
+    jnz L8
+    jmp L9
+L8:
     pushl $1
     jmp L10
-L8:
+L9:
     pushl $0
 L10:
     call printBool
@@ -108,7 +108,7 @@ L10:
     popl %eax
     testl %eax, %eax
     jnz L15
-    jmp L12
+    jmp L13
 L15:
     pushl $21321
     call test
@@ -116,12 +116,12 @@ L15:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L13
-    jmp L12
-L13:
+    jnz L12
+    jmp L13
+L12:
     pushl $1
     jmp L14
-L12:
+L13:
     pushl $0
 L14:
     call printBool
@@ -138,7 +138,7 @@ L14:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L17
+    jnz L16
     jmp L19
 L19:
     pushl $0
@@ -147,12 +147,12 @@ L19:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L17
-    jmp L16
-L17:
+    jnz L16
+    jmp L17
+L16:
     pushl $1
     jmp L18
-L16:
+L17:
     pushl $0
 L18:
     call printBool
@@ -166,7 +166,7 @@ L18:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L21
+    jnz L20
     jmp L23
 L23:
     pushl $1
@@ -175,12 +175,12 @@ L23:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L21
-    jmp L20
-L21:
+    jnz L20
+    jmp L21
+L20:
     pushl $1
     jmp L22
-L20:
+L21:
     pushl $0
 L22:
     call printBool
@@ -191,7 +191,7 @@ L22:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L25
+    jnz L24
     jmp L27
 L27:
     pushl $5
@@ -203,12 +203,12 @@ L27:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L25
-    jmp L24
-L25:
+    jnz L24
+    jmp L25
+L24:
     pushl $1
     jmp L26
-L24:
+L25:
     pushl $0
 L26:
     call printBool
@@ -219,7 +219,7 @@ L26:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L29
+    jnz L28
     jmp L31
 L31:
     pushl $21321
@@ -228,12 +228,12 @@ L31:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L29
-    jmp L28
-L29:
+    jnz L28
+    jmp L29
+L28:
     pushl $1
     jmp L30
-L28:
+L29:
     pushl $0
 L30:
     call printBool
@@ -258,14 +258,14 @@ printBool:
     pushl 8(%ebp)
     popl %eax
     testl %eax, %eax
-    jnz L32
-    jmp L33
-L33:
+    jnz L33
+    jmp L32
+L32:
     pushl $LStr3
     call printString
     popl %ebx
     jmp L34
-L32:
+L33:
     pushl $LStr4
     call printString
     popl %ebx

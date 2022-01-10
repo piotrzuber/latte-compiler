@@ -8,15 +8,15 @@ f:
     pushl $1
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     pushl $0
     popl %eax
     leave
     ret
     jmp L2
-L0:
+L1:
 L2:
     leave
 g:
@@ -26,11 +26,11 @@ g:
     pushl $0
     popl %eax
     testl %eax, %eax
-    jnz L4
-    jmp L3
-L4:
-    jmp L5
+    jnz L3
+    jmp L4
 L3:
+    jmp L5
+L4:
     pushl $0
     popl %eax
     leave

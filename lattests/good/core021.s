@@ -8,9 +8,9 @@ main:
     pushl $1
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     pushl $1
     call printInt
     popl %ebx
@@ -18,5 +18,5 @@ L1:
     popl %eax
     leave
     ret
-L0:
+L1:
     leave

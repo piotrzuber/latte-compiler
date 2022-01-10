@@ -42,7 +42,7 @@ main:
     popl -8(%ebp)
     pushl $1
     popl -12(%ebp)
-L1:
+L0:
     pushl -8(%ebp)
     pushl $0
     popl %eax
@@ -55,9 +55,9 @@ L3:
 L4:
     popl %eax
     testl %eax, %eax
-    jnz L0
+    jnz L1
     jmp L2
-L0:
+L1:
     leal -12(%ebp), %eax
     pushl %eax
     pushl -12(%ebp)
@@ -73,7 +73,7 @@ L0:
     pushl %eax
     popl %eax
     decl (%eax)
-    jmp L1
+    jmp L0
 L2:
     pushl -12(%ebp)
     call printInt
@@ -116,7 +116,7 @@ fac:
     popl %eax
     popl %ebx
     movl %eax, (%ebx)
-L6:
+L5:
     pushl -8(%ebp)
     pushl $0
     popl %eax
@@ -129,9 +129,9 @@ L8:
 L9:
     popl %eax
     testl %eax, %eax
-    jnz L5
+    jnz L6
     jmp L7
-L5:
+L6:
     leal -4(%ebp), %eax
     pushl %eax
     pushl -4(%ebp)
@@ -154,7 +154,7 @@ L5:
     popl %eax
     popl %ebx
     movl %eax, (%ebx)
-    jmp L6
+    jmp L5
 L7:
     pushl -4(%ebp)
     popl %eax
@@ -176,15 +176,15 @@ L13:
 L14:
     popl %eax
     testl %eax, %eax
-    jnz L11
-    jmp L10
-L11:
+    jnz L10
+    jmp L11
+L10:
     pushl $1
     popl %eax
     leave
     ret
     jmp L12
-L10:
+L11:
     pushl 8(%ebp)
     pushl 8(%ebp)
     pushl $1
@@ -220,15 +220,15 @@ L18:
 L19:
     popl %eax
     testl %eax, %eax
-    jnz L16
-    jmp L15
-L16:
+    jnz L15
+    jmp L16
+L15:
     pushl $1
     popl %eax
     leave
     ret
     jmp L17
-L15:
+L16:
     pushl 8(%ebp)
     pushl 8(%ebp)
     pushl $1
@@ -264,9 +264,9 @@ L23:
 L24:
     popl %eax
     testl %eax, %eax
-    jnz L21
-    jmp L20
-L21:
+    jnz L20
+    jmp L21
+L20:
     pushl 8(%ebp)
     pushl $1
     popl %eax
@@ -285,7 +285,7 @@ L21:
     leave
     ret
     jmp L22
-L20:
+L21:
     pushl $1
     popl %eax
     leave
@@ -321,14 +321,14 @@ L27:
 L28:
     popl %eax
     testl %eax, %eax
-    jnz L26
-    jmp L25
-L26:
+    jnz L25
+    jmp L26
+L25:
     pushl 12(%ebp)
     popl %eax
     leave
     ret
-L25:
+L26:
     pushl 12(%ebp)
     pushl 8(%ebp)
     popl %eax
@@ -341,14 +341,14 @@ L31:
 L32:
     popl %eax
     testl %eax, %eax
-    jnz L30
-    jmp L29
-L30:
+    jnz L29
+    jmp L30
+L29:
     pushl $1
     popl %eax
     leave
     ret
-L29:
+L30:
     pushl $0
     popl -4(%ebp)
     leal -4(%ebp), %eax
@@ -401,7 +401,7 @@ repStr:
     popl -4(%ebp)
     pushl $0
     popl -8(%ebp)
-L34:
+L33:
     pushl -8(%ebp)
     pushl 8(%ebp)
     popl %eax
@@ -414,9 +414,9 @@ L36:
 L37:
     popl %eax
     testl %eax, %eax
-    jnz L33
+    jnz L34
     jmp L35
-L33:
+L34:
     leal -4(%ebp), %eax
     pushl %eax
     pushl 12(%ebp)
@@ -432,7 +432,7 @@ L33:
     pushl %eax
     popl %eax
     incl (%eax)
-    jmp L34
+    jmp L33
 L35:
     pushl -4(%ebp)
     popl %eax

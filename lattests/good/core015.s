@@ -31,9 +31,9 @@ L3:
 L4:
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     pushl 8(%ebp)
     pushl $2
     popl %eax
@@ -47,7 +47,7 @@ L1:
     leave
     ret
     jmp L2
-L0:
+L1:
     pushl 8(%ebp)
     pushl $0
     popl %eax
@@ -60,15 +60,15 @@ L8:
 L9:
     popl %eax
     testl %eax, %eax
-    jnz L6
-    jmp L5
-L6:
+    jnz L5
+    jmp L6
+L5:
     pushl $0
     popl %eax
     leave
     ret
     jmp L7
-L5:
+L6:
     pushl $1
     popl %eax
     leave

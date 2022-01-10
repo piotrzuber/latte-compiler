@@ -26,9 +26,9 @@ L3:
 L4:
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     leal -4(%ebp), %eax
     pushl %eax
     pushl $1
@@ -36,7 +36,7 @@ L1:
     popl %ebx
     movl %eax, (%ebx)
     jmp L2
-L0:
+L1:
     leal -4(%ebp), %eax
     pushl %eax
     pushl $2

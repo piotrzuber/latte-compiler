@@ -21,32 +21,23 @@ f:
     pushl %ebp
     movl %esp, %ebp
     subl $0, %esp
-    pushl 8(%ebp)
-    pushl 12(%ebp)
-    popl %eax
-    cmpl %eax, 0(%esp)
-    jle L3
     pushl $1
-    jmp L4
-L3:
-    pushl $0
-L4:
     popl %eax
     testl %eax, %eax
-    jnz L1
+    jnz L0
     jmp L2
 L2:
     call e
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L0
-L1:
+    jnz L0
+    jmp L1
+L0:
     pushl $LStr0
     call printString
     popl %ebx
-L0:
+L1:
     leave
 e:
     pushl %ebp

@@ -105,31 +105,31 @@ compNumOp (BinRel op) = do
 
 compBooleanExp :: Expr -> CMonad Instruction
 compBooleanExp exp = do
-    falseL <- nextLabelId
     trueL <- nextLabelId
+    falseL <- nextLabelId
     finallyL <- nextLabelId
-    compdExp <- compBooleanExp_ exp falseL trueL
+    compdExp <- compBooleanExp_ exp trueL falseL
     return $ IBlock [compdExp, getLabelDecl trueL, getPushl "$1", 
         uncondJmp finallyL, getLabelDecl falseL, getPushl "$0", 
         getLabelDecl finallyL]
 compBooleanExp_ :: Expr -> Integer -> Integer -> CMonad Instruction
-compBooleanExp_ (EAnd _ exp1 exp2) falseL trueL = do
+compBooleanExp_ (EAnd _ exp1 exp2) trueL falseL = do
     auxL <- nextLabelId
-    compdExp1 <- compBooleanExp_ exp1 falseL auxL
-    compdExp2 <- compBooleanExp_ exp2 falseL trueL
+    compdExp1 <- compBooleanExp_ exp1 auxL falseL
+    compdExp2 <- compBooleanExp_ exp2 trueL falseL
     return $ IBlock [compdExp1, getLabelDecl auxL, compdExp2]
-compBooleanExp_ (EOr _ exp1 exp2) falseL trueL = do
+compBooleanExp_ (EOr _ exp1 exp2) trueL falseL = do
     auxL <- nextLabelId
-    compdExp1 <- compBooleanExp_ exp1 auxL trueL
-    compdExp2 <- compBooleanExp_ exp2 falseL trueL
+    compdExp1 <- compBooleanExp_ exp1 trueL auxL
+    compdExp2 <- compBooleanExp_ exp2 trueL falseL
     return $ IBlock [compdExp1, getLabelDecl auxL, compdExp2]
-compBooleanExp_ rel@(ERel _ exp1 op exp2) falseL trueL = do
+compBooleanExp_ rel@(ERel _ exp1 op exp2) trueL falseL = do
     compdExp <- compExp rel
     return $ IBlock [compdExp, getPopl $ show EAX, getTestl (show EAX) (show EAX), noZeroJmp trueL,
         uncondJmp falseL]
-compBooleanExp_ (Not _ exp) falseL trueL = 
-    compBooleanExp_ exp trueL falseL
-compBooleanExp_ exp falseL trueL = do
+compBooleanExp_ (Not _ exp) trueL falseL = 
+    compBooleanExp_ exp falseL trueL
+compBooleanExp_ exp trueL falseL = do
     compdExp <- compExp exp
     return $ IBlock [compdExp, getPopl $ show EAX, getTestl (show EAX) (show EAX), noZeroJmp trueL,
         uncondJmp falseL]
@@ -194,26 +194,26 @@ compStmt (Ret _ exp) = do
     return $ IBlock [compdExp, getPopl $ show EAX, getLeave, getRet]
 compStmt (VRet _) = return $ IBlock [getLeave, getRet]
 compStmt (Cond _ exp stmt) = do
-    falseL <- nextLabelId
     trueL <- nextLabelId
-    compdExp <- compBooleanExp_ exp falseL trueL
+    falseL <- nextLabelId
+    compdExp <- compBooleanExp_ exp trueL falseL
     compdStmt <- compStmt (BStmt Nothing (Block Nothing [stmt]))
     return $ IBlock [compdExp, getLabelDecl trueL, compdStmt, 
         getLabelDecl falseL]
 compStmt (CondElse _ exp s1 s2) = do
-    falseL <- nextLabelId
     trueL <- nextLabelId
+    falseL <- nextLabelId
     finallyL <- nextLabelId
-    compdExp <- compBooleanExp_ exp falseL trueL
+    compdExp <- compBooleanExp_ exp trueL falseL
     compdS1 <- compStmt (BStmt Nothing (Block Nothing [s1]))
     compdS2 <- compStmt (BStmt Nothing (Block Nothing [s2]))
     return $ IBlock [compdExp, getLabelDecl trueL, compdS1,
         uncondJmp finallyL, getLabelDecl falseL, compdS2, getLabelDecl finallyL]
 compStmt (While _ exp stmt) = do
-    loopL <- nextLabelId
     condL <- nextLabelId
+    loopL <- nextLabelId
     finallyL <- nextLabelId
-    compdExp <- compBooleanExp_ exp finallyL loopL
+    compdExp <- compBooleanExp_ exp loopL finallyL
     compdStmt <- compStmt (BStmt Nothing (Block Nothing [stmt]))
     return $ IBlock [getLabelDecl condL, compdExp, getLabelDecl loopL, 
         compdStmt, uncondJmp condL, getLabelDecl finallyL]
