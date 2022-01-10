@@ -44,7 +44,7 @@ run inputPath code =
             exitSuccess
 
 gppCmd :: FilePath -> FilePath -> String 
-gppCmd x86Path outPath= "gcc -m32 lib/runtime.o " ++ x86Path ++ " -o " ++ outPath
+gppCmd x86Path outPath= "ld -melf_i386 lib/runtime.o " ++ x86Path ++ " -o " ++ outPath ++ "-L/home/students/inf/PUBLIC/MRJP/lib32 /home/students/inf/PUBLIC/MRJP/lib32/crt?.o -lc"
 
 exitWithErrorMsg :: String -> IO ()
 exitWithErrorMsg msg = do
