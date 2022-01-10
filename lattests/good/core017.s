@@ -24,8 +24,8 @@ L4:
 L5:
     popl %eax
     testl %eax, %eax
-    jnz L0
-    jmp L3
+    jnz L3
+    jmp L0
 L3:
     pushl $4
     pushl $2
@@ -39,8 +39,8 @@ L7:
 L8:
     popl %eax
     testl %eax, %eax
-    jnz L1
-    jmp L6
+    jnz L6
+    jmp L0
 L6:
     pushl $1
     popl %eax
@@ -103,8 +103,8 @@ L19:
 L20:
     popl %eax
     testl %eax, %eax
-    jnz L15
-    jmp L18
+    jnz L18
+    jmp L15
 L18:
     pushl $2
     call dontCallMe
@@ -112,8 +112,8 @@ L18:
     pushl %eax
     popl %eax
     testl %eax, %eax
-    jnz L15
-    jmp L16
+    jnz L16
+    jmp L15
 L16:
     pushl $1
     jmp L17
@@ -134,15 +134,15 @@ L25:
 L26:
     popl %eax
     testl %eax, %eax
-    jnz L21
-    jmp L24
+    jnz L24
+    jmp L21
 L24:
     pushl $1
     pushl $0
     popl %eax
     testl %eax, %eax
-    jnz L29
-    jmp L28
+    jnz L28
+    jmp L29
 L29:
     pushl $1
     jmp L30
@@ -159,8 +159,8 @@ L31:
 L32:
     popl %eax
     testl %eax, %eax
-    jnz L22
-    jmp L27
+    jnz L27
+    jmp L21
 L27:
     pushl $1
     popl %eax
@@ -250,8 +250,8 @@ implies:
     pushl 12(%ebp)
     popl %eax
     testl %eax, %eax
-    jnz L37
-    jmp L39
+    jnz L39
+    jmp L37
 L39:
     pushl 12(%ebp)
     pushl 8(%ebp)

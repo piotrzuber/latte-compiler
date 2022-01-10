@@ -36,8 +36,8 @@ L5:
 L6:
     popl %eax
     testl %eax, %eax
-    jnz L3
-    jmp L4
+    jnz L4
+    jmp L3
 L4:
     pushl 8(%ebp)
     pushl $0
@@ -51,8 +51,8 @@ L7:
 L8:
     popl %eax
     testl %eax, %eax
-    jnz L3
-    jmp L1
+    jnz L1
+    jmp L3
 L3:
     pushl 12(%ebp)
     pushl $0
@@ -66,8 +66,8 @@ L10:
 L11:
     popl %eax
     testl %eax, %eax
-    jnz L0
-    jmp L9
+    jnz L9
+    jmp L0
 L9:
     pushl 8(%ebp)
     pushl $0
@@ -81,8 +81,8 @@ L12:
 L13:
     popl %eax
     testl %eax, %eax
-    jnz L0
-    jmp L1
+    jnz L1
+    jmp L0
 L1:
     pushl $7
     popl %eax

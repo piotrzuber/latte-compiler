@@ -115,8 +115,8 @@ compBooleanExp exp = do
 compBooleanExp_ :: Expr -> Integer -> Integer -> CMonad Instruction
 compBooleanExp_ (EAnd _ exp1 exp2) falseL trueL = do
     auxL <- nextLabelId
-    compdExp1 <- compBooleanExp_ exp1 auxL falseL
-    compdExp2 <- compBooleanExp_ exp2 trueL falseL
+    compdExp1 <- compBooleanExp_ exp1 falseL auxL
+    compdExp2 <- compBooleanExp_ exp2 falseL trueL
     return $ IBlock [compdExp1, getLabelDecl auxL, compdExp2]
 compBooleanExp_ (EOr _ exp1 exp2) falseL trueL = do
     auxL <- nextLabelId
@@ -128,7 +128,7 @@ compBooleanExp_ rel@(ERel _ exp1 op exp2) falseL trueL = do
     return $ IBlock [compdExp, getPopl $ show EAX, getTestl (show EAX) (show EAX), noZeroJmp trueL,
         uncondJmp falseL]
 compBooleanExp_ (Not _ exp) falseL trueL = 
-    compBooleanExp_ exp falseL trueL
+    compBooleanExp_ exp trueL falseL
 compBooleanExp_ exp falseL trueL = do
     compdExp <- compExp exp
     return $ IBlock [compdExp, getPopl $ show EAX, getTestl (show EAX) (show EAX), noZeroJmp trueL,
