@@ -1,0 +1,152 @@
+lattests/bad/bad001.lat
+Parse error. syntax error at line 1, column 1 before `/'
+
+lattests/bad/bad002.lat
+Parse error. syntax error at line 1, column 1 before `a'
+
+lattests/bad/bad003.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 2, col: 14: Multiple variable x declaration in local scope
+
+lattests/bad/bad004.lat
+Parse error. syntax error at line 1, column 9 before `)'
+
+lattests/bad/bad005.lat
+Parse error. syntax error at line 1, column 1 before `foo'
+
+lattests/bad/bad006.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 2, col: 9: Use of undeclared variable x
+
+lattests/bad/bad007.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 3, col: 13: Multiple variable x declaration in local scope
+
+lattests/bad/bad008.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 1, col: 3: Missing return statement in function main
+
+lattests/bad/bad009.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 3, col: 9: The type of assignment expression does not match the type of variable
+
+lattests/bad/bad010.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 3, col: 17: Void return from int type function
+
+lattests/bad/bad011.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 2, col: 6: Invalid expression type returned from a function, expected: int, got: bool
+
+lattests/bad/bad012.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 6, col: 1: Missing return statement in function foo
+
+lattests/bad/bad013.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 3, col: 16: Invalid types of parameters used with `+` operator, got: string, int
+
+lattests/bad/bad015.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 18: Invalid argument type in function call, expected: int got: string
+
+lattests/bad/bad016.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 21: Invalid argument type in function call, expected: string got: int
+
+lattests/bad/bad017.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 17: Unexpected number of arguments in function call
+
+lattests/bad/bad018.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 17: Unexpected number of arguments in function call
+
+lattests/bad/bad019.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 17: Unexpected number of arguments in function call
+
+lattests/bad/bad020.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 14: Invalid types of parameters used with relational operator, got: string, bool
+
+lattests/bad/bad021.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 1: Missing return statement in function main
+
+lattests/bad/bad022.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 6: The type of expression does not match the type of variable, expected: int got: string
+
+lattests/bad/bad023.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 4, col: 9: The type of expression does not match the type of variable, expected: string got: int
+
+lattests/bad/bad024.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 1, col: 1: Missing return statement in function main
+
+lattests/bad/bad025.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 1: Missing return statement in function f
+
+lattests/bad/bad026.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 3: The type of assignment expression does not match the type of variable
+
+lattests/bad/bad027.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 2: The type of assignment expression does not match the type of variable
+
+lattests/bad/voidequ.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 14: Attempt to compare void variables
+
+lattests/bad/voidge.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 14: Attempt to compare void variables
+
+lattests/bad/voidgth.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 14: Attempt to compare void variables
+
+lattests/bad/voidle.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 14: Attempt to compare void variables
+
+lattests/bad/voidlth.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 14: Attempt to compare void variables
+
+lattests/bad/voidne.lat
+ERROR
+Static check finished with errors
+Static check error found at line: 5, col: 14: Attempt to compare void variables
+

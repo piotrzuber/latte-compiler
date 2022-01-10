@@ -94,6 +94,7 @@ evalExp (ERel _ lhs op rhs) = do
     (lhsT, lhsV) <- evalExp lhs
     (rhsT, rhsV) <- evalExp rhs
     unless (lhsT == rhsT) $ throwSCError pos $ RelParamsTypeMismatchError lhsT rhsT
+    when (lhsT == VoidT) $ throwSCError pos $ VoidTypeComparisonError
     case op of
         EQU _ -> return (BoolT, genericRelOp (==) lhsV rhsV)
         NE _ -> return (BoolT, genericRelOp (/=) lhsV rhsV)

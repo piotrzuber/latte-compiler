@@ -83,6 +83,7 @@ data SCError
     | UndeclaredVarError VarId
     | VarTypeMismatchError
     | VoidRetNonVoidFunError VarT
+    | VoidTypeComparisonError
     | ZeroDivisionError
     | DebugError (Maybe VarV) (Maybe VarV)
 
@@ -113,5 +114,6 @@ instance Show SCError where
     show (UndeclaredVarError v) = "Use of undeclared variable " ++ showIdent v
     show VarTypeMismatchError = "Invalid variable type"
     show (VoidRetNonVoidFunError g) = "Void return from " ++ show g ++ " type function"
+    show VoidTypeComparisonError = "Attempt to compare void variables"
     show ZeroDivisionError = "Division by zero"
     show (DebugError v1 v2) = "DEBUG!!!! 1st: " ++ show v1 ++ " 2nd: " ++ show v2
