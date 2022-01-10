@@ -5,7 +5,6 @@
 concat:
 .LFB0:
 	.cfi_startproc
-	endbr32
 	pushl	%ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
@@ -75,7 +74,6 @@ concat:
 error:
 .LFB1:
 	.cfi_startproc
-	endbr32
 	pushl	%ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
@@ -106,7 +104,6 @@ error:
 printInt:
 .LFB2:
 	.cfi_startproc
-	endbr32
 	pushl	%ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
@@ -139,7 +136,6 @@ printInt:
 printString:
 .LFB3:
 	.cfi_startproc
-	endbr32
 	pushl	%ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
@@ -170,7 +166,6 @@ printString:
 readInt:
 .LFB4:
 	.cfi_startproc
-	endbr32
 	pushl	%ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
@@ -187,7 +182,7 @@ readInt:
 	leal	.LC1@GOTOFF(%eax), %edx
 	pushl	%edx
 	movl	%eax, %ebx
-	call	__isoc99_scanf@PLT
+	call	scanf@PLT
 	addl	$16, %esp
 	movl	-12(%ebp), %eax
 	movl	-4(%ebp), %ebx
@@ -204,7 +199,6 @@ readInt:
 readString:
 .LFB5:
 	.cfi_startproc
-	endbr32
 	pushl	%ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
@@ -269,21 +263,5 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE7:
-	.ident	"GCC: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0"
+	.ident	"GCC: (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
 	.section	.note.GNU-stack,"",@progbits
-	.section	.note.gnu.property,"a"
-	.align 4
-	.long	 1f - 0f
-	.long	 4f - 1f
-	.long	 5
-0:
-	.string	 "GNU"
-1:
-	.align 4
-	.long	 0xc0000002
-	.long	 3f - 2f
-2:
-	.long	 0x3
-3:
-	.align 4
-4:
