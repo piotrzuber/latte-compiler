@@ -24,58 +24,58 @@ main:
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $45
     pushl $2
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $78
     pushl $3
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %edx
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     popl %eax
     cmpl %eax, 0(%esp)
@@ -86,20 +86,20 @@ L0:
     pushl $0
 L1:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     pushl -8(%ebp)
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %eax
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
     cmpl %eax, 0(%esp)
@@ -110,20 +110,20 @@ L2:
     pushl $0
 L3:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $LStr2
     pushl $LStr1
     pushl $LStr0
     call concat
-    popl %ebx
-    popl %ebx
+    popl %ecx
+    popl %ecx
     pushl %eax
     call concat
-    popl %ebx
-    popl %ebx
+    popl %ecx
+    popl %ecx
     pushl %eax
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -140,15 +140,16 @@ printBool:
 L4:
     pushl $LStr3
     call printString
-    popl %ebx
+    addl $4, %esp
     leave
     ret
     jmp L6
 L5:
     pushl $LStr4
     call printString
-    popl %ebx
+    addl $4, %esp
     leave
     ret
 L6:
     leave
+    ret

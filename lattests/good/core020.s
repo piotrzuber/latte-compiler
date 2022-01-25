@@ -6,9 +6,10 @@ main:
     movl %esp, %ebp
     subl $0, %esp
     call p
+    addl $0, %esp
     pushl $1
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -18,3 +19,4 @@ p:
     movl %esp, %ebp
     subl $0, %esp
     leave
+    ret

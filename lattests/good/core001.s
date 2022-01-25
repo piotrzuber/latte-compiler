@@ -14,28 +14,28 @@ main:
     subl $12, %esp
     pushl $10
     call fac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $10
     call rfac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $10
     call mfac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $10
     call ifac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $LStr0
     popl -4(%ebp)
     pushl $10
@@ -63,12 +63,12 @@ L1:
     pushl -12(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     popl %eax
@@ -77,21 +77,20 @@ L1:
 L2:
     pushl -12(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $LStr1
     pushl $60
     call repStr
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $LStr2
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $LStr3
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -108,14 +107,14 @@ fac:
     pushl %eax
     pushl $1
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     pushl 8(%ebp)
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
 L5:
     pushl -8(%ebp)
     pushl $0
@@ -137,23 +136,23 @@ L6:
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     pushl -8(%ebp)
     pushl $1
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     jmp L5
 L7:
     pushl -4(%ebp)
@@ -189,21 +188,22 @@ L11:
     pushl 8(%ebp)
     pushl $1
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     call rfac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
     leave
     ret
 L12:
     leave
+    ret
 mfac:
     pushl %ebp
     movl %esp, %ebp
@@ -233,21 +233,22 @@ L16:
     pushl 8(%ebp)
     pushl $1
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     call nfac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
     leave
     ret
 L17:
     leave
+    ret
 nfac:
     pushl %ebp
     movl %esp, %ebp
@@ -270,16 +271,16 @@ L20:
     pushl 8(%ebp)
     pushl $1
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     call mfac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     pushl 8(%ebp)
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
     leave
@@ -292,6 +293,7 @@ L21:
     ret
 L22:
     leave
+    ret
 ifac:
     pushl %ebp
     movl %esp, %ebp
@@ -299,8 +301,7 @@ ifac:
     pushl $1
     pushl 8(%ebp)
     call ifac2f
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     popl %eax
     leave
@@ -356,39 +357,37 @@ L30:
     pushl 12(%ebp)
     pushl 8(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl $2
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %eax
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     pushl 12(%ebp)
     pushl -4(%ebp)
     call ifac2f
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     pushl -4(%ebp)
     pushl $1
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 8(%ebp)
     call ifac2f
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
     leave
@@ -422,12 +421,12 @@ L34:
     pushl 12(%ebp)
     pushl -4(%ebp)
     call concat
-    popl %ebx
-    popl %ebx
+    popl %ecx
+    popl %ecx
     pushl %eax
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     popl %eax

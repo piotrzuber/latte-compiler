@@ -7,10 +7,10 @@ main:
     subl $0, %esp
     pushl $5
     call fac
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -27,14 +27,14 @@ fac:
     pushl %eax
     pushl $1
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     pushl 8(%ebp)
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
 L0:
     pushl -8(%ebp)
     pushl $0
@@ -56,23 +56,23 @@ L1:
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     pushl -8(%ebp)
     pushl $1
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     jmp L0
 L2:
     pushl -4(%ebp)

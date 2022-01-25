@@ -7,10 +7,10 @@ main:
     subl $0, %esp
     pushl $17
     call ev
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -37,11 +37,11 @@ L0:
     pushl 8(%ebp)
     pushl $2
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     call ev
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     leave
@@ -76,3 +76,4 @@ L6:
 L7:
 L2:
     leave
+    ret

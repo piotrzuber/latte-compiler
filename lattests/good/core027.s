@@ -10,7 +10,7 @@ main:
     subl $0, %esp
     pushl $LStr0
     call f
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -23,9 +23,10 @@ f:
     pushl %eax
     pushl $LStr1
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     pushl 8(%ebp)
     call printString
-    popl %ebx
+    addl $4, %esp
     leave
+    ret

@@ -51,7 +51,7 @@ compFunApp :: Ident -> [Expr] -> Type -> CMonad Instruction
 compFunApp (Ident ident) args retT = do
     compdArgs <- mapM compExp args
     let argsLen = List.length args
-    let compdPopArgs = IBlock $ replicate argsLen $ getPopl $ show EBX
+    let compdPopArgs = getAddl ("$" ++ (show (argsLen * 4))) (show ESP)
     let compdApp = IBlock [IBlock compdArgs, getCall ident, compdPopArgs]
     case retT of
         Void _ -> return compdApp
@@ -78,7 +78,7 @@ compBinaryOp op exp1 exp2 = do
             compdExp1 <- compExp exp1
             compdExp2 <- compExp exp2
             return $ IBlock [compdExp2, compdExp1, getCall "concat",
-                getPopl $ show EBX, getPopl $ show EBX, getPushl $ show EAX]
+                getPopl $ show ECX, getPopl $ show ECX, getPushl $ show EAX]
         _ -> do
             compdExp1 <- compExp exp1
             compdExp2 <- compExp exp2
@@ -86,16 +86,16 @@ compBinaryOp op exp1 exp2 = do
             return $ IBlock [compdExp1, compdExp2, compdOp]
 
 compNumOp :: BinaryOp -> CMonad Instruction
-compNumOp (BinAdd (Minus _)) = return $ IBlock [getPopl $ show EAX, getPopl $ show EBX, 
-    getSubl (show EAX) (show EBX), getPushl $ show EBX]
-compNumOp (BinAdd (Plus _)) = return $ IBlock [getPopl $ show EAX, getPopl $ show EBX, 
-    getAddl (show EBX) (show EAX), getPushl $ show EAX]
-compNumOp (BinMul (Div _)) = return $ IBlock [getPopl $ show EBX, getPopl $ show EAX,
-    getMovl (show EAX) (show EDX), Indent "sar $31, %edx", getIdiv $ show EBX, getPushl $ show EAX]
-compNumOp (BinMul (Mod _)) = return $ IBlock [getPopl $ show EBX, getPopl $ show EAX,
-    getMovl (show EAX) (show EDX), Indent "sar $31, %edx", getIdiv $ show EBX, getPushl $ show EDX]
-compNumOp (BinMul (Times _)) = return $ IBlock [getPopl $ show EAX, getPopl $ show EBX, 
-    getImul (show EBX) (show EAX), getPushl $ show EAX]
+compNumOp (BinAdd (Minus _)) = return $ IBlock [getPopl $ show EAX, getPopl $ show ECX, 
+    getSubl (show EAX) (show ECX), getPushl $ show ECX]
+compNumOp (BinAdd (Plus _)) = return $ IBlock [getPopl $ show EAX, getPopl $ show ECX, 
+    getAddl (show ECX) (show EAX), getPushl $ show EAX]
+compNumOp (BinMul (Div _)) = return $ IBlock [getPopl $ show ECX, getPopl $ show EAX,
+    getMovl (show EAX) (show EDX), Indent "sar $31, %edx", getIdiv $ show ECX, getPushl $ show EAX]
+compNumOp (BinMul (Mod _)) = return $ IBlock [getPopl $ show ECX, getPopl $ show EAX,
+    getMovl (show EAX) (show EDX), Indent "sar $31, %edx", getIdiv $ show ECX, getPushl $ show EDX]
+compNumOp (BinMul (Times _)) = return $ IBlock [getPopl $ show EAX, getPopl $ show ECX, 
+    getImul (show ECX) (show EAX), getPushl $ show EAX]
 compNumOp (BinRel op) = do
     falseL <- nextLabelId
     trueL <- nextLabelId
@@ -173,8 +173,8 @@ compStmt (Ass _ ident exp) = do
         let compdVar = show varOff ++ "(" ++ show EBP ++ ")"
         return $ IBlock [getLeal compdVar $ show EAX, getPushl $ show EAX]
     compdExp <- compExp exp
-    return $ IBlock [compdIdent, compdExp, getPopl $ show EAX, getPopl $ show EBX, 
-        getMovl (show EAX) ("(" ++ show EBX ++ ")")]
+    return $ IBlock [compdIdent, compdExp, getPopl $ show EAX, getPopl $ show ECX, 
+        getMovl (show EAX) ("(" ++ show ECX ++ ")")]
 compStmt (Incr _ ident) = do
     compdIdent <- do
         s <- get
@@ -263,9 +263,9 @@ compTopDef (FnDef _ t i@(Ident ident) args b@(Block _ block)) = do
         case last block of
             (Ret _ _)  -> return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock]
             (VRet _) -> return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock]
-            _ -> return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock, getLeave]
+            _ -> return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock, getLeave, getRet]
     else
-        return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock, getLeave]
+        return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock, getLeave, getRet]
 
 prepareArgs :: Integer -> [Arg] -> CMonad Integer
 prepareArgs s [] = return s
@@ -358,6 +358,7 @@ getStringsExp :: Expr -> [String]
 getStringsExp (EString _ string) = [string]
 getStringsExp (EAdd _ e1 (Plus _) e2) = getStringsExp e1 ++ getStringsExp e2
 getStringsExp (EApp _ _ args) = concatMap getStringsExp args
+getStringsExp (ERel _ e1 (EQU _) e2) = getStringsExp e1 ++ getStringsExp e2
 getStringsExp _ = []
 
 prepareString :: Integer -> String -> CMonad ()

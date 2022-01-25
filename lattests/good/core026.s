@@ -16,8 +16,8 @@ s:
     pushl 8(%ebp)
     pushl $1
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     popl %eax
     leave
@@ -27,249 +27,250 @@ main:
     movl %esp, %ebp
     subl $0, %esp
     call d
+    addl $0, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call s
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

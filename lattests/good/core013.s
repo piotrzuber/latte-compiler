@@ -16,13 +16,13 @@ main:
     subl $0, %esp
     pushl $LStr0
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $1
     popl %eax
     neg %eax
     pushl %eax
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -31,7 +31,7 @@ main:
 L3:
     pushl $0
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -44,13 +44,13 @@ L1:
     pushl $0
 L2:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $2
     popl %eax
     neg %eax
     pushl %eax
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -59,7 +59,7 @@ L2:
 L7:
     pushl $1
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -72,10 +72,10 @@ L5:
     pushl $0
 L6:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $3
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -87,7 +87,7 @@ L11:
     neg %eax
     pushl %eax
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -100,10 +100,10 @@ L9:
     pushl $0
 L10:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $234234
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -112,7 +112,7 @@ L10:
 L15:
     pushl $21321
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -125,16 +125,16 @@ L13:
     pushl $0
 L14:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $LStr1
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $1
     popl %eax
     neg %eax
     pushl %eax
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -143,7 +143,7 @@ L14:
 L19:
     pushl $0
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -156,13 +156,13 @@ L17:
     pushl $0
 L18:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $2
     popl %eax
     neg %eax
     pushl %eax
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -171,7 +171,7 @@ L18:
 L23:
     pushl $1
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -184,10 +184,10 @@ L21:
     pushl $0
 L22:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $3
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -199,7 +199,7 @@ L27:
     neg %eax
     pushl %eax
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -212,10 +212,10 @@ L25:
     pushl $0
 L26:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $234234
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -224,7 +224,7 @@ L26:
 L31:
     pushl $21321
     call test
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -237,16 +237,16 @@ L29:
     pushl $0
 L30:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $LStr2
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $1
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $0
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -263,12 +263,12 @@ printBool:
 L32:
     pushl $LStr3
     call printString
-    popl %ebx
+    addl $4, %esp
     jmp L34
 L33:
     pushl $LStr4
     call printString
-    popl %ebx
+    addl $4, %esp
 L34:
     leave
     ret
@@ -278,7 +278,7 @@ test:
     subl $0, %esp
     pushl 8(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl 8(%ebp)
     pushl $0
     popl %eax

@@ -7,6 +7,7 @@ main:
     movl %esp, %ebp
     subl $0, %esp
     call foo
+    addl $0, %esp
     pushl $0
     popl %eax
     leave
@@ -17,6 +18,6 @@ foo:
     subl $0, %esp
     pushl $LStr0
     call printString
-    popl %ebx
+    addl $4, %esp
     leave
     ret

@@ -15,23 +15,23 @@ main:
     pushl %eax
     pushl $1
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     pushl -4(%ebp)
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -12(%ebp), %eax
     pushl %eax
     pushl $5000000
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
 L0:
     pushl -8(%ebp)
     pushl -12(%ebp)
@@ -50,29 +50,29 @@ L4:
 L1:
     pushl -8(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     leal -8(%ebp), %eax
     pushl %eax
     pushl -4(%ebp)
     pushl -8(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -4(%ebp), %eax
     pushl %eax
     pushl -8(%ebp)
     pushl -4(%ebp)
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     jmp L0
 L2:
     pushl $0

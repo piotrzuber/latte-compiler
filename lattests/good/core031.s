@@ -11,11 +11,10 @@ main:
     neg %eax
     pushl %eax
     call f
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -96,3 +95,4 @@ L1:
     ret
 L2:
     leave
+    ret

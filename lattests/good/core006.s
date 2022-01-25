@@ -13,8 +13,8 @@ main:
     pushl %eax
     pushl $45
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     leal -8(%ebp), %eax
     pushl %eax
     pushl $36
@@ -22,14 +22,14 @@ main:
     neg %eax
     pushl %eax
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -8(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

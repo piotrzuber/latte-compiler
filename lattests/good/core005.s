@@ -12,8 +12,8 @@ main:
     pushl -8(%ebp)
     pushl $45
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl $2
     popl %eax
@@ -33,20 +33,20 @@ L0:
     pushl %eax
     pushl $1
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     jmp L2
 L1:
     leal -4(%ebp), %eax
     pushl %eax
     pushl $2
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
 L2:
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

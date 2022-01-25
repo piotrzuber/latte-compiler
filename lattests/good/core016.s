@@ -28,12 +28,12 @@ L1:
     pushl -4(%ebp)
     pushl $2
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     popl %eax
-    popl %ebx
-    movl %eax, (%ebx)
+    popl %ecx
+    movl %eax, (%ecx)
     jmp L0
 L2:
     pushl -4(%ebp)
@@ -53,7 +53,7 @@ L9:
 L5:
     pushl $0
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -62,10 +62,11 @@ L5:
 L6:
     pushl $1
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
     ret
 L7:
     leave
+    ret

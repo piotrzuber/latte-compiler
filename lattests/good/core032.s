@@ -13,14 +13,14 @@ main:
     popl %eax
     neg %eax
     pushl %eax
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

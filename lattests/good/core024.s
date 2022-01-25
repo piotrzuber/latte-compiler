@@ -11,8 +11,7 @@ main:
     pushl $1
     pushl $2
     call f
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl $0
     popl %eax
     leave
@@ -37,6 +36,7 @@ L4:
     jmp L2
 L2:
     call e
+    addl $0, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -45,16 +45,17 @@ L2:
 L0:
     pushl $LStr0
     call printString
-    popl %ebx
+    addl $4, %esp
 L1:
     leave
+    ret
 e:
     pushl %ebp
     movl %esp, %ebp
     subl $0, %esp
     pushl $LStr1
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

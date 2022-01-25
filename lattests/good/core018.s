@@ -6,30 +6,33 @@ main:
     movl %esp, %ebp
     subl $12, %esp
     call readInt
+    addl $0, %esp
     pushl %eax
     popl -4(%ebp)
     call readString
+    addl $0, %esp
     pushl %eax
     popl -8(%ebp)
     call readString
+    addl $0, %esp
     pushl %eax
     popl -12(%ebp)
     pushl -4(%ebp)
     pushl $5
     popl %eax
-    popl %ebx
-    subl %eax, %ebx
-    pushl %ebx
+    popl %ecx
+    subl %eax, %ecx
+    pushl %ecx
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -12(%ebp)
     pushl -8(%ebp)
     call concat
-    popl %ebx
-    popl %ebx
+    popl %ecx
+    popl %ecx
     pushl %eax
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

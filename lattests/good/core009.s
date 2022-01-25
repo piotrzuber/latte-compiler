@@ -6,11 +6,12 @@ main:
     movl %esp, %ebp
     subl $4, %esp
     call foo
+    addl $0, %esp
     pushl %eax
     popl -4(%ebp)
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

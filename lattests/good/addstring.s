@@ -15,11 +15,11 @@ main:
     pushl -8(%ebp)
     pushl -4(%ebp)
     call concat
-    popl %ebx
-    popl %ebx
+    popl %ecx
+    popl %ecx
     pushl %eax
     call printString
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

@@ -11,11 +11,11 @@ main:
     neg %eax
     pushl %eax
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

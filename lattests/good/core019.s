@@ -12,10 +12,10 @@ main:
     popl -8(%ebp)
     pushl -8(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
 L0:
     pushl -4(%ebp)
     pushl $76
@@ -38,22 +38,22 @@ L1:
     decl (%eax)
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     pushl $7
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     popl -8(%ebp)
     pushl -8(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     jmp L0
 L2:
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     pushl $4
     popl %eax
@@ -73,16 +73,16 @@ L5:
     popl -8(%ebp)
     pushl -8(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     jmp L7
 L6:
     pushl $LStr0
     call printString
-    popl %ebx
+    addl $4, %esp
 L7:
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave

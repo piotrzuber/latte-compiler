@@ -22,7 +22,7 @@ L3:
 L0:
     pushl $42
     call printInt
-    popl %ebx
+    addl $4, %esp
 L1:
     pushl $0
     popl %eax

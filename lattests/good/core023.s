@@ -48,20 +48,7 @@ main:
     pushl -52(%ebp)
     pushl -56(%ebp)
     call foo
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
-    popl %ebx
+    addl $56, %esp
     pushl %eax
     popl %eax
     leave
@@ -73,99 +60,99 @@ foo:
     pushl $2
     pushl 60(%ebp)
     popl %eax
-    popl %ebx
-    imul %ebx, %eax
+    popl %ecx
+    imul %ecx, %eax
     pushl %eax
     pushl 56(%ebp)
     pushl $2
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %eax
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 52(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 48(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 44(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 40(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 36(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 32(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 28(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 24(%ebp)
     pushl $2
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %eax
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 20(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 16(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 12(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl 8(%ebp)
     popl %eax
-    popl %ebx
-    addl %ebx, %eax
+    popl %ecx
+    addl %ecx, %eax
     pushl %eax
     pushl $10
-    popl %ebx
+    popl %ecx
     popl %eax
     movl %eax, %edx
     sar $31, %edx
-    idiv %ebx
+    idiv %ecx
     pushl %edx
     popl -4(%ebp)
     pushl -4(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl -4(%ebp)
     popl %eax
     leave

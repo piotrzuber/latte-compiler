@@ -192,3 +192,809 @@ Saving x86 AT&T output in lattests/good/core032.s
 Compiling x86 AT&T code
 gcc -m32 lib/runtime.o lattests/good/core032.s -o lattests/good/core032
 
+lattests/good/addstring.lat
+OK
+Saving x86 AT&T output in lattests/good/addstring.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/addstring.s -o lattests/good/addstring
+
+lattests/good/alama.lat
+OK
+Saving x86 AT&T output in lattests/good/alama.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/alama.s -o lattests/good/alama
+
+lattests/good/addstring.lat
+OK
+Saving x86 AT&T output in lattests/good/addstring.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/addstring.s -o lattests/good/addstring
+
+lattests/good/alama.lat
+OK
+Saving x86 AT&T output in lattests/good/alama.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/alama.s -o lattests/good/alama
+
+DIFF ERROR
+
+2: - 
+
+lattests/good/core001.lat
+OK
+Saving x86 AT&T output in lattests/good/core001.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core001.s -o lattests/good/core001
+
+lattests/good/core002.lat
+OK
+Saving x86 AT&T output in lattests/good/core002.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core002.s -o lattests/good/core002
+
+lattests/good/core003.lat
+OK
+Saving x86 AT&T output in lattests/good/core003.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core003.s -o lattests/good/core003
+
+lattests/good/core004.lat
+OK
+Saving x86 AT&T output in lattests/good/core004.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core004.s -o lattests/good/core004
+
+lattests/good/core005.lat
+OK
+Saving x86 AT&T output in lattests/good/core005.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core005.s -o lattests/good/core005
+
+lattests/good/core006.lat
+OK
+Saving x86 AT&T output in lattests/good/core006.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core006.s -o lattests/good/core006
+
+lattests/good/core007.lat
+OK
+Saving x86 AT&T output in lattests/good/core007.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core007.s -o lattests/good/core007
+
+lattests/good/core008.lat
+OK
+Saving x86 AT&T output in lattests/good/core008.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core008.s -o lattests/good/core008
+
+lattests/good/core009.lat
+OK
+Saving x86 AT&T output in lattests/good/core009.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core009.s -o lattests/good/core009
+
+lattests/good/core010.lat
+OK
+Saving x86 AT&T output in lattests/good/core010.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core010.s -o lattests/good/core010
+
+lattests/good/core011.lat
+OK
+Saving x86 AT&T output in lattests/good/core011.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core011.s -o lattests/good/core011
+
+lattests/good/core012.lat
+OK
+Saving x86 AT&T output in lattests/good/core012.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core012.s -o lattests/good/core012
+
+lattests/good/core013.lat
+OK
+Saving x86 AT&T output in lattests/good/core013.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core013.s -o lattests/good/core013
+
+lattests/good/core014.lat
+OK
+Saving x86 AT&T output in lattests/good/core014.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core014.s -o lattests/good/core014
+
+lattests/good/core015.lat
+OK
+Saving x86 AT&T output in lattests/good/core015.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core015.s -o lattests/good/core015
+
+lattests/good/core016.lat
+OK
+Saving x86 AT&T output in lattests/good/core016.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core016.s -o lattests/good/core016
+
+lattests/good/core017.lat
+OK
+Saving x86 AT&T output in lattests/good/core017.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core017.s -o lattests/good/core017
+
+lattests/good/core018.lat
+OK
+Saving x86 AT&T output in lattests/good/core018.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core018.s -o lattests/good/core018
+
+lattests/good/core019.lat
+OK
+Saving x86 AT&T output in lattests/good/core019.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core019.s -o lattests/good/core019
+
+lattests/good/core020.lat
+OK
+Saving x86 AT&T output in lattests/good/core020.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core020.s -o lattests/good/core020
+
+lattests/good/core021.lat
+OK
+Saving x86 AT&T output in lattests/good/core021.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core021.s -o lattests/good/core021
+
+lattests/good/core022.lat
+OK
+Saving x86 AT&T output in lattests/good/core022.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core022.s -o lattests/good/core022
+
+lattests/good/core023.lat
+OK
+Saving x86 AT&T output in lattests/good/core023.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core023.s -o lattests/good/core023
+
+lattests/good/core024.lat
+OK
+Saving x86 AT&T output in lattests/good/core024.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core024.s -o lattests/good/core024
+
+DIFF ERROR
+
+4: - N
+5: - O
+6: - O
+7: - O
+8: - 
+
+lattests/good/core025.lat
+OK
+Saving x86 AT&T output in lattests/good/core025.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core025.s -o lattests/good/core025
+
+lattests/good/core026.lat
+OK
+Saving x86 AT&T output in lattests/good/core026.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core026.s -o lattests/good/core026
+
+lattests/good/core027.lat
+OK
+Saving x86 AT&T output in lattests/good/core027.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core027.s -o lattests/good/core027
+
+lattests/good/core028.lat
+OK
+Saving x86 AT&T output in lattests/good/core028.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core028.s -o lattests/good/core028
+
+lattests/good/core031.lat
+OK
+Saving x86 AT&T output in lattests/good/core031.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core031.s -o lattests/good/core031
+
+lattests/good/core032.lat
+OK
+Saving x86 AT&T output in lattests/good/core032.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core032.s -o lattests/good/core032
+
+lattests/good/or.lat
+OK
+Saving x86 AT&T output in lattests/good/or.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/or.s -o lattests/good/or
+
+lattests/good/addstring.lat
+OK
+Saving x86 AT&T output in lattests/good/addstring.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/addstring.s -o lattests/good/addstring
+
+lattests/good/alama.lat
+OK
+Saving x86 AT&T output in lattests/good/alama.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/alama.s -o lattests/good/alama
+
+DIFF ERROR
+
+2: - 
+
+lattests/good/core001.lat
+OK
+Saving x86 AT&T output in lattests/good/core001.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core001.s -o lattests/good/core001
+
+lattests/good/core002.lat
+OK
+Saving x86 AT&T output in lattests/good/core002.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core002.s -o lattests/good/core002
+
+lattests/good/core003.lat
+OK
+Saving x86 AT&T output in lattests/good/core003.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core003.s -o lattests/good/core003
+
+lattests/good/core004.lat
+OK
+Saving x86 AT&T output in lattests/good/core004.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core004.s -o lattests/good/core004
+
+lattests/good/core005.lat
+OK
+Saving x86 AT&T output in lattests/good/core005.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core005.s -o lattests/good/core005
+
+lattests/good/core006.lat
+OK
+Saving x86 AT&T output in lattests/good/core006.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core006.s -o lattests/good/core006
+
+lattests/good/core007.lat
+OK
+Saving x86 AT&T output in lattests/good/core007.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core007.s -o lattests/good/core007
+
+lattests/good/core008.lat
+OK
+Saving x86 AT&T output in lattests/good/core008.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core008.s -o lattests/good/core008
+
+lattests/good/core009.lat
+OK
+Saving x86 AT&T output in lattests/good/core009.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core009.s -o lattests/good/core009
+
+lattests/good/core010.lat
+OK
+Saving x86 AT&T output in lattests/good/core010.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core010.s -o lattests/good/core010
+
+lattests/good/core011.lat
+OK
+Saving x86 AT&T output in lattests/good/core011.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core011.s -o lattests/good/core011
+
+lattests/good/core012.lat
+OK
+Saving x86 AT&T output in lattests/good/core012.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core012.s -o lattests/good/core012
+
+lattests/good/core013.lat
+OK
+Saving x86 AT&T output in lattests/good/core013.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core013.s -o lattests/good/core013
+
+lattests/good/core014.lat
+OK
+Saving x86 AT&T output in lattests/good/core014.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core014.s -o lattests/good/core014
+
+lattests/good/core015.lat
+OK
+Saving x86 AT&T output in lattests/good/core015.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core015.s -o lattests/good/core015
+
+lattests/good/core016.lat
+OK
+Saving x86 AT&T output in lattests/good/core016.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core016.s -o lattests/good/core016
+
+lattests/good/core017.lat
+OK
+Saving x86 AT&T output in lattests/good/core017.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core017.s -o lattests/good/core017
+
+lattests/good/core018.lat
+OK
+Saving x86 AT&T output in lattests/good/core018.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core018.s -o lattests/good/core018
+
+lattests/good/core019.lat
+OK
+Saving x86 AT&T output in lattests/good/core019.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core019.s -o lattests/good/core019
+
+lattests/good/core020.lat
+OK
+Saving x86 AT&T output in lattests/good/core020.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core020.s -o lattests/good/core020
+
+lattests/good/core021.lat
+OK
+Saving x86 AT&T output in lattests/good/core021.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core021.s -o lattests/good/core021
+
+lattests/good/core022.lat
+OK
+Saving x86 AT&T output in lattests/good/core022.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core022.s -o lattests/good/core022
+
+lattests/good/core023.lat
+OK
+Saving x86 AT&T output in lattests/good/core023.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core023.s -o lattests/good/core023
+
+lattests/good/core024.lat
+OK
+Saving x86 AT&T output in lattests/good/core024.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core024.s -o lattests/good/core024
+
+lattests/good/core025.lat
+OK
+Saving x86 AT&T output in lattests/good/core025.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core025.s -o lattests/good/core025
+
+lattests/good/core026.lat
+OK
+Saving x86 AT&T output in lattests/good/core026.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core026.s -o lattests/good/core026
+
+lattests/good/core027.lat
+OK
+Saving x86 AT&T output in lattests/good/core027.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core027.s -o lattests/good/core027
+
+lattests/good/core028.lat
+OK
+Saving x86 AT&T output in lattests/good/core028.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core028.s -o lattests/good/core028
+
+lattests/good/core031.lat
+OK
+Saving x86 AT&T output in lattests/good/core031.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core031.s -o lattests/good/core031
+
+lattests/good/core032.lat
+OK
+Saving x86 AT&T output in lattests/good/core032.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core032.s -o lattests/good/core032
+
+lattests/good/addstring.lat
+OK
+Saving x86 AT&T output in lattests/good/addstring.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/addstring.s -o lattests/good/addstring
+
+lattests/good/alama.lat
+OK
+Saving x86 AT&T output in lattests/good/alama.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/alama.s -o lattests/good/alama
+
+DIFF ERROR
+
+2: - 
+
+lattests/good/core001.lat
+OK
+Saving x86 AT&T output in lattests/good/core001.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core001.s -o lattests/good/core001
+
+lattests/good/core002.lat
+OK
+Saving x86 AT&T output in lattests/good/core002.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core002.s -o lattests/good/core002
+
+lattests/good/core003.lat
+OK
+Saving x86 AT&T output in lattests/good/core003.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core003.s -o lattests/good/core003
+
+lattests/good/core004.lat
+OK
+Saving x86 AT&T output in lattests/good/core004.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core004.s -o lattests/good/core004
+
+lattests/good/core005.lat
+OK
+Saving x86 AT&T output in lattests/good/core005.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core005.s -o lattests/good/core005
+
+lattests/good/core006.lat
+OK
+Saving x86 AT&T output in lattests/good/core006.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core006.s -o lattests/good/core006
+
+lattests/good/core007.lat
+OK
+Saving x86 AT&T output in lattests/good/core007.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core007.s -o lattests/good/core007
+
+lattests/good/core008.lat
+OK
+Saving x86 AT&T output in lattests/good/core008.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core008.s -o lattests/good/core008
+
+lattests/good/core009.lat
+OK
+Saving x86 AT&T output in lattests/good/core009.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core009.s -o lattests/good/core009
+
+lattests/good/core010.lat
+OK
+Saving x86 AT&T output in lattests/good/core010.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core010.s -o lattests/good/core010
+
+lattests/good/core011.lat
+OK
+Saving x86 AT&T output in lattests/good/core011.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core011.s -o lattests/good/core011
+
+lattests/good/core012.lat
+OK
+Saving x86 AT&T output in lattests/good/core012.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core012.s -o lattests/good/core012
+
+lattests/good/core013.lat
+OK
+Saving x86 AT&T output in lattests/good/core013.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core013.s -o lattests/good/core013
+
+lattests/good/core014.lat
+OK
+Saving x86 AT&T output in lattests/good/core014.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core014.s -o lattests/good/core014
+
+lattests/good/core015.lat
+OK
+Saving x86 AT&T output in lattests/good/core015.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core015.s -o lattests/good/core015
+
+lattests/good/core016.lat
+OK
+Saving x86 AT&T output in lattests/good/core016.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core016.s -o lattests/good/core016
+
+lattests/good/core017.lat
+OK
+Saving x86 AT&T output in lattests/good/core017.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core017.s -o lattests/good/core017
+
+lattests/good/core018.lat
+OK
+Saving x86 AT&T output in lattests/good/core018.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core018.s -o lattests/good/core018
+
+lattests/good/core019.lat
+OK
+Saving x86 AT&T output in lattests/good/core019.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core019.s -o lattests/good/core019
+
+lattests/good/core020.lat
+OK
+Saving x86 AT&T output in lattests/good/core020.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core020.s -o lattests/good/core020
+
+lattests/good/core021.lat
+OK
+Saving x86 AT&T output in lattests/good/core021.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core021.s -o lattests/good/core021
+
+lattests/good/core022.lat
+OK
+Saving x86 AT&T output in lattests/good/core022.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core022.s -o lattests/good/core022
+
+lattests/good/core023.lat
+OK
+Saving x86 AT&T output in lattests/good/core023.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core023.s -o lattests/good/core023
+
+lattests/good/core024.lat
+OK
+Saving x86 AT&T output in lattests/good/core024.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core024.s -o lattests/good/core024
+
+lattests/good/core025.lat
+OK
+Saving x86 AT&T output in lattests/good/core025.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core025.s -o lattests/good/core025
+
+lattests/good/core026.lat
+OK
+Saving x86 AT&T output in lattests/good/core026.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core026.s -o lattests/good/core026
+
+lattests/good/core027.lat
+OK
+Saving x86 AT&T output in lattests/good/core027.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core027.s -o lattests/good/core027
+
+lattests/good/core028.lat
+OK
+Saving x86 AT&T output in lattests/good/core028.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core028.s -o lattests/good/core028
+
+lattests/good/core031.lat
+OK
+Saving x86 AT&T output in lattests/good/core031.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core031.s -o lattests/good/core031
+
+lattests/good/core032.lat
+OK
+Saving x86 AT&T output in lattests/good/core032.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core032.s -o lattests/good/core032
+
+lattests/good/addstring.lat
+OK
+Saving x86 AT&T output in lattests/good/addstring.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/addstring.s -o lattests/good/addstring
+
+lattests/good/alama.lat
+OK
+Saving x86 AT&T output in lattests/good/alama.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/alama.s -o lattests/good/alama
+
+lattests/good/core001.lat
+OK
+Saving x86 AT&T output in lattests/good/core001.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core001.s -o lattests/good/core001
+
+lattests/good/core002.lat
+OK
+Saving x86 AT&T output in lattests/good/core002.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core002.s -o lattests/good/core002
+
+lattests/good/core003.lat
+OK
+Saving x86 AT&T output in lattests/good/core003.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core003.s -o lattests/good/core003
+
+lattests/good/core004.lat
+OK
+Saving x86 AT&T output in lattests/good/core004.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core004.s -o lattests/good/core004
+
+lattests/good/core005.lat
+OK
+Saving x86 AT&T output in lattests/good/core005.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core005.s -o lattests/good/core005
+
+lattests/good/core006.lat
+OK
+Saving x86 AT&T output in lattests/good/core006.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core006.s -o lattests/good/core006
+
+lattests/good/core007.lat
+OK
+Saving x86 AT&T output in lattests/good/core007.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core007.s -o lattests/good/core007
+
+lattests/good/core008.lat
+OK
+Saving x86 AT&T output in lattests/good/core008.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core008.s -o lattests/good/core008
+
+lattests/good/core009.lat
+OK
+Saving x86 AT&T output in lattests/good/core009.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core009.s -o lattests/good/core009
+
+lattests/good/core010.lat
+OK
+Saving x86 AT&T output in lattests/good/core010.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core010.s -o lattests/good/core010
+
+lattests/good/core011.lat
+OK
+Saving x86 AT&T output in lattests/good/core011.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core011.s -o lattests/good/core011
+
+lattests/good/core012.lat
+OK
+Saving x86 AT&T output in lattests/good/core012.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core012.s -o lattests/good/core012
+
+lattests/good/core013.lat
+OK
+Saving x86 AT&T output in lattests/good/core013.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core013.s -o lattests/good/core013
+
+lattests/good/core014.lat
+OK
+Saving x86 AT&T output in lattests/good/core014.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core014.s -o lattests/good/core014
+
+lattests/good/core015.lat
+OK
+Saving x86 AT&T output in lattests/good/core015.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core015.s -o lattests/good/core015
+
+lattests/good/core016.lat
+OK
+Saving x86 AT&T output in lattests/good/core016.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core016.s -o lattests/good/core016
+
+lattests/good/core017.lat
+OK
+Saving x86 AT&T output in lattests/good/core017.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core017.s -o lattests/good/core017
+
+lattests/good/core018.lat
+OK
+Saving x86 AT&T output in lattests/good/core018.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core018.s -o lattests/good/core018
+
+lattests/good/core019.lat
+OK
+Saving x86 AT&T output in lattests/good/core019.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core019.s -o lattests/good/core019
+
+lattests/good/core020.lat
+OK
+Saving x86 AT&T output in lattests/good/core020.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core020.s -o lattests/good/core020
+
+lattests/good/core021.lat
+OK
+Saving x86 AT&T output in lattests/good/core021.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core021.s -o lattests/good/core021
+
+lattests/good/core022.lat
+OK
+Saving x86 AT&T output in lattests/good/core022.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core022.s -o lattests/good/core022
+
+lattests/good/core023.lat
+OK
+Saving x86 AT&T output in lattests/good/core023.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core023.s -o lattests/good/core023
+
+lattests/good/core024.lat
+OK
+Saving x86 AT&T output in lattests/good/core024.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core024.s -o lattests/good/core024
+
+lattests/good/core025.lat
+OK
+Saving x86 AT&T output in lattests/good/core025.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core025.s -o lattests/good/core025
+
+lattests/good/core026.lat
+OK
+Saving x86 AT&T output in lattests/good/core026.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core026.s -o lattests/good/core026
+
+lattests/good/core027.lat
+OK
+Saving x86 AT&T output in lattests/good/core027.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core027.s -o lattests/good/core027
+
+lattests/good/core028.lat
+OK
+Saving x86 AT&T output in lattests/good/core028.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core028.s -o lattests/good/core028
+
+lattests/good/core031.lat
+OK
+Saving x86 AT&T output in lattests/good/core031.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core031.s -o lattests/good/core031
+
+lattests/good/core032.lat
+OK
+Saving x86 AT&T output in lattests/good/core032.s
+Compiling x86 AT&T code
+gcc -m32 lib/runtime.o lattests/good/core032.s -o lattests/good/core032
+

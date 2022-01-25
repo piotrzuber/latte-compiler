@@ -50,12 +50,12 @@ L6:
 L0:
     pushl $1
     call printBool
-    popl %ebx
+    addl $4, %esp
     jmp L2
 L1:
     pushl $LStr0
     call printString
-    popl %ebx
+    addl $4, %esp
 L2:
     pushl $1
     pushl $1
@@ -74,7 +74,7 @@ L14:
 L12:
     pushl $1
     call dontCallMe
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -87,7 +87,7 @@ L10:
     pushl $0
 L11:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $4
     pushl $5
     popl %eax
@@ -108,7 +108,7 @@ L20:
 L18:
     pushl $2
     call dontCallMe
-    popl %ebx
+    addl $4, %esp
     pushl %eax
     popl %eax
     testl %eax, %eax
@@ -121,7 +121,7 @@ L16:
     pushl $0
 L17:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $4
     pushl -4(%ebp)
     popl %eax
@@ -174,39 +174,35 @@ L22:
     pushl $0
 L23:
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $0
     pushl $0
     call implies
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $0
     pushl $1
     call implies
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $1
     pushl $0
     call implies
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $1
     pushl $1
     call implies
-    popl %ebx
-    popl %ebx
+    addl $8, %esp
     pushl %eax
     call printBool
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
@@ -217,7 +213,7 @@ dontCallMe:
     subl $0, %esp
     pushl 8(%ebp)
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $1
     popl %eax
     leave
@@ -234,12 +230,12 @@ printBool:
 L33:
     pushl $LStr1
     call printString
-    popl %ebx
+    addl $4, %esp
     jmp L35
 L34:
     pushl $LStr2
     call printString
-    popl %ebx
+    addl $4, %esp
 L35:
     leave
     ret

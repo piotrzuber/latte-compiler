@@ -13,10 +13,11 @@ main:
 L0:
     pushl $1
     call printInt
-    popl %ebx
+    addl $4, %esp
     pushl $0
     popl %eax
     leave
     ret
 L1:
     leave
+    ret
