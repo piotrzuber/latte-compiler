@@ -22,8 +22,35 @@ nextLabelId = do
     modify (\s -> s {label = labelId + 1})
     return labelId
 
+getVarT :: Ident -> CMonad Type
+getVarT ident = do
+    s <- get
+    if M.member ident (varEnv s) then
+        return $ vType $ (varEnv s) Map.! ident
+    else
+        getExprType (EProp Nothing (EVar Nothing (Ident "this")) ident)
+
+getTypeSize :: Type -> Int
+getTypeSize (Array _) = 8
+getTypeSize Bool = 4
+getTypeSize (ClsType _) = 4
+getTypeSize Int = 4
+getTypeSize Str = 4
+getTypeSize _ = 0
+
+getVarOff :: Ident -> CMonad Integer
+getVarOff ident = do
+    s <- get
+    return $ varOff $ case Map.lookup ident (varEnv s) of
+        Just var -> v
+        _ -> error "VarOff lookup error"
+
 compExp :: Expr -> CMonad Instruction
-compExp (EVar pos ident) = pushVar pos ident 0
+compExp (EVar pos ident) = do
+    t <- getVarT ident
+    case t of
+        Array _ _ -> do
+            compdVar <- 
 compExp (ELitInt _ i) = return $ getPushl $ "$" ++ show i
 compExp (ELitTrue _) = return $ getPushl "$1"
 compExp (ELitFalse _) = return $ getPushl "$0"
@@ -60,8 +87,40 @@ compFunApp (Ident ident) args retT = do
 pushVar :: BNFC'Position -> Ident -> Integer -> CMonad Instruction
 pushVar pos ident off = do
     s <- get
-    let varOff = offset $ (varEnv s) Map.! ident
-    return $ getPushl $ show (off + varOff) ++ "(" ++ show EBP ++ ")"
+    if Map.member ident (varEnv s) then do
+        compdVar = pushVarContent ident off
+        return $ getPushl compdVar
+    else 
+        compExp (EProp Nothing (EVar Nothing (Ident "this")) ident)
+
+pushVarContent :: Ident -> Integer -> CMonad String
+pushVarContent ident off = do
+    vo <- getVarOff ident
+    return $ show (vo ++ off) ++ "(" ++ show EBP ++ ")"
+
+compLValue :: Expr -> CMonad Instruction
+compLValue (EVar ident) = do
+    s <- get
+    if Map.member ident (varEnv s) then do
+        compdVarS <- pushVarContent ident 0
+        return $ IBlock [getLeal compdVarS (show EAX), getPushl $ show EAX]
+    else
+        compLValue $ EProp _ (EVar _ (Ident "this")) ident
+compLValue (EArrGet _ a i) = do
+    compdArr <- compLValue a
+    compdIdx <- compExp i
+    return $ IBlock [compdArr, compdIdx, getPopl (show EAX), getPopl (show EBX), 
+        getMovl ("(" ++ show EBX ++ ")") (show ECX), getLeal "(%ecx, %eax, 4)" (show EBX), getPushl EBX]
+compLValue (EProp _ exp ident) = do
+    (ClsType _ cls) <- evalExpType exp
+    compdExp <- compLValue exp
+    ct <- evalClassType cls
+    let varOff = offset $ case Map.lookup ident (vEnv ct) of
+        Just vo -> vo
+        _ -> error "Eprop lvalue lookup error"
+    return $ IBlock [compdExp, getPopl (show EAX), getMovl ("(" ++ (show EAX) ++ ")") (show ECX),
+        getLeal (show varOff ++ "(" ++ show ECX ++ ")"), getPushl $ show EAX]
+compLValue e@(EApp _ ident args) = compExp e
 
 evalRetType :: BNFC'Position -> Ident -> CMonad Type
 evalRetType pos ident = do
@@ -135,9 +194,7 @@ compBooleanExp_ exp trueL falseL = do
         uncondJmp falseL]
 
 evalExpType :: Expr -> CMonad Type
-evalExpType (EVar _ ident) = do
-    s <- get
-    return $ vType $ (varEnv s) Map.! ident
+evalExpType (EVar _ ident) = getVarT ident
 evalExpType (ELitInt _ _) = return $ Int Nothing
 evalExpType (ELitTrue _) = return $ Bool Nothing
 evalExpType (ELitFalse _) = return $ Bool Nothing
@@ -151,6 +208,32 @@ evalExpType (EAdd _ _ (Minus _) exp) = return $ Int Nothing
 evalExpType (ERel _ _ _ _) = return $ Bool Nothing
 evalExpType (EAnd _ _ _ ) = return $ Bool Nothing
 evalExpType (EOr _ _ _ ) = return $ Bool Nothing
+evalExpType (ENewArr _ t _) = return t
+evalExpType (EArrGet _ exp _) = do
+    (Array t) <- evalExpType exp
+    return t
+evalExpType (ENewCls _ (ClsType ident)) = return $ ClsType ident
+evalExpType (EProp _ exp ident) = do
+    t <- evalExpType exp
+    case t of
+        (ClsType _ name) -> do
+            ct <- evalClassType ident
+            return $ vType $ case M.lookup ident (vEnv ct) of
+                Just t' -> t'
+                _ -> error "EProp lookup error"
+        (Array _ _) -> return Int
+evalExpType (EPropApp _ exp ident _) = do
+    (ClsType _ name) <- evalExpType exp
+    ct <- evalClassType name
+    case Map.lookup ident (fEnv ct) of
+        (Just t) -> t
+        _ -> error "EPropApp lookup error"
+evalExpType (ENull _ ident) = return $ ClsType ident
+
+evalClassType :: Ident -> CMonad ClsT
+evalClassType ident = do
+    s <- get
+    return $ (clsEnv s) M.! ident
 
 compStmt :: Stmt -> CMonad Instruction
 compStmt (Empty _) = return EmptyIns
@@ -234,14 +317,16 @@ evalItem t item size = do
     ident <- case item of 
         (Init _ i _) -> return i
         (NoInit _ i) -> return i
+    let sizeOfVar = getTypeSize t
     s <- get
-    put $ CState (Map.insert ident (getNewVar t (size - 4)) (varEnv s)) (funRetEnv s) (strEnv s) (min (size - 4) (minStack s)) (maxStack s) (label s)
+    put $ CState (clsEnv s) (Map.insert ident (getNewVar t (size - sizeOfVar)) (varEnv s)) (funRetEnv s) (strEnv s) (min (size - sizeOfVar) (minStack s)) (maxStack s) (label s)
     updatedState <- get
     let varOff = offset $ (varEnv updatedState) Map.! ident
     let compdVar = show varOff ++ "(" ++ show EBP ++ ")"
     return (IBlock [compdDecl, getPopl compdVar], size - 4)
 
 getInitValue :: Type -> Expr
+getInitValue (Array _ t) -> ENewArr t (ELitInt 0)
 getInitValue (Str _) = EString Nothing ""
 getInitValue _ = ELitInt Nothing 0
 
@@ -299,6 +384,10 @@ getVarsSize (sHead : sTail) size = case sHead of
         updatedS <- getVarsSize stmts size
         getVarsSize sTail updatedS
     (While _ _ stmt) -> getVarsSize (stmt:sTail) size
+    (For _ t ident _ stmt) -> do
+        (,_ updatedS) <- evalItemList t [NoInit Nothing ident] size
+        (_, maxS) <- evalItemList Int [NoInit (Ident "dummy")] updatedS
+        getVarsSize (s:sTail) maxS
     _ -> getVarsSize sTail size
 
 compProg :: Program -> CMonad Instruction

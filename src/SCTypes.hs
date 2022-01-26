@@ -6,13 +6,23 @@ import qualified Data.Set as Set
 
 import AbsLatte
 
-data VarT = BoolT | IntT | NoneT | StrT | VoidT deriving Eq
+data VarT 
+    = BoolT 
+    | IntT 
+    | NoneT 
+    | StrT 
+    | VoidT 
+    | ArrayT Type
+    | ClassT Ident
+    deriving Eq
 
 instance Show VarT where
     show BoolT = "bool"
     show IntT = "int"
     show StrT = "string"
     show VoidT = "void"
+    show (ArrayT t) = "[" ++ (show (getVarTFromType t)) ++ "]"
+    show (ClassT i) = show i
     show _ = "None"
     
 getVarTFromType :: Type -> VarT
@@ -20,7 +30,15 @@ getVarTFromType (Int _) = IntT
 getVarTFromType (Str _) = StrT
 getVarTFromType (Bool _) = BoolT
 getVarTFromType (Void _) = VoidT
+getVarTFromType (Array _ t) = ArrayT t
+getVarTFromType (ClsType _ i) = ClassT i
 getVarTFromType _ = NoneT
+
+data ClsT = ClsT {
+    superName :: Maybe Ident,
+    cVEnv :: VarEnv,
+    cFEnv :: FunEnv
+}
 
 type ArgsT = [VarT]
 type RetT = VarT
@@ -38,9 +56,11 @@ type VarId = Ident
 
 type FunEnv = Map.Map FunId FunT
 type VarEnv = Map.Map VarId VarT
+type ClsEnv = Map.Map Ident ClsT
 type LocalStore = Set.Set VarId
 
 data SCState = SCState {
+    cEnv :: ClsEnv,
     fEnv :: FunEnv,
     localStore :: LocalStore,
     vEnv :: VarEnv,
@@ -86,6 +106,16 @@ data SCError
     | VoidTypeComparisonError
     | ZeroDivisionError
     | DebugError (Maybe VarV) (Maybe VarV)
+    | ArrayIndexTypeMismatchError
+    | ArrTypeMismatchError VarT
+    | UnknownClassInitError Ident
+    | InvalidArrayAttrError Ident
+    | UnknownClassAttributeError Ident Ident
+    | UnknownClassNameError Ident
+    | NonObjectTypeError VarT
+    | NonMethodTypeError VarT
+    | InvalidNullCastError
+    | NonIterableForError VarT
 
 instance Show SCError where
     show (AndParamsTypeMismatchError g1 g2) = "Both conjunction parameters have to be boolean, got: " ++ show g1 ++ ", " ++ show g2
@@ -117,3 +147,13 @@ instance Show SCError where
     show VoidTypeComparisonError = "Attempt to compare void variables"
     show ZeroDivisionError = "Division by zero"
     show (DebugError v1 v2) = "DEBUG!!!! 1st: " ++ show v1 ++ " 2nd: " ++ show v2
+    show ArrayIndexTypeMismatchError = "An index of an array must be an integer"
+    show (ArrTypeMismatchError g) = "Subscripted value is not an array, got: " ++ show g
+    show (UnknownClassInitError i) = "Initialization of an object of an unknown class: " ++ show i
+    show (InvalidArrayAttrError i) = "An array has no attribute " ++ show i
+    show (UnknownClassAttributeError c a) = "No " ++ show a ++ " attribute for class " ++ show c
+    show (UnknownClassNameError i) = "Cannot find class " ++ show i
+    show (NonObjectTypeError t) = "Variable of type " ++ show t ++ " cannot have attributes"
+    show (NonMethodTypeError t) = "Type " ++ show t ++ " cannot have methods"
+    show (InvalidNullCastError) = "Invalid usage of null typecast"
+    show (NonIterableForError t) = "Non-iterable type " ++ show t ++ " in foreach loop"

@@ -23,7 +23,18 @@ data Program' a = Program a [TopDef' a]
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type TopDef = TopDef' BNFC'Position
-data TopDef' a = FnDef a (Type' a) Ident [Arg' a] (Block' a)
+data TopDef' a
+    = TopFnDef a (FnDef' a)
+    | ClsExtDef a Ident Ident [ClsStmt' a]
+    | ClsDef a Ident [ClsStmt' a]
+  deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
+
+type ClsStmt = ClsStmt' BNFC'Position
+data ClsStmt' a = FnProp a (FnDef' a) | AttrProp a (Type' a) Ident
+  deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
+
+type FnDef = FnDef' BNFC'Position
+data FnDef' a = FnDef a (Type' a) Ident [Arg' a] (Block' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Arg = Arg' BNFC'Position
@@ -39,15 +50,16 @@ data Stmt' a
     = Empty a
     | BStmt a (Block' a)
     | Decl a (Type' a) [Item' a]
-    | Ass a Ident (Expr' a)
-    | Incr a Ident
-    | Decr a Ident
+    | Ass a (Expr' a) (Expr' a)
+    | Incr a (Expr' a)
+    | Decr a (Expr' a)
     | Ret a (Expr' a)
     | VRet a
     | Cond a (Expr' a) (Stmt' a)
     | CondElse a (Expr' a) (Stmt' a) (Stmt' a)
     | While a (Expr' a) (Stmt' a)
     | SExp a (Expr' a)
+    | For a (Type' a) Ident (Expr' a) (Stmt' a)
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Item = Item' BNFC'Position
@@ -56,7 +68,15 @@ data Item' a = NoInit a Ident | Init a Ident (Expr' a)
 
 type Type = Type' BNFC'Position
 data Type' a
-    = Int a | Str a | Bool a | Void a | Fun a (Type' a) [Type' a]
+    = Int a
+    | Str a
+    | Bool a
+    | Void a
+    | Array a (Type' a)
+    | ClsType a Ident
+    | Fun a (Type' a) [Type' a]
+    | Arr a (Type' a) Integer
+    | VTable a Ident
   deriving (C.Eq, C.Ord, C.Show, C.Read, C.Functor, C.Foldable, C.Traversable)
 
 type Expr = Expr' BNFC'Position
@@ -67,6 +87,12 @@ data Expr' a
     | ELitFalse a
     | EApp a Ident [Expr' a]
     | EString a String
+    | ENewArr a (Type' a) (Expr' a)
+    | EArrGet a (Expr' a) (Expr' a)
+    | ENewCls a (Type' a)
+    | EProp a (Expr' a) Ident
+    | EPropApp a (Expr' a) Ident [Expr' a]
+    | ENull a Ident
     | Neg a (Expr' a)
     | Not a (Expr' a)
     | EMul a (Expr' a) (MulOp' a) (Expr' a)
@@ -112,6 +138,17 @@ instance HasPosition Program where
 
 instance HasPosition TopDef where
   hasPosition = \case
+    TopFnDef p _ -> p
+    ClsExtDef p _ _ _ -> p
+    ClsDef p _ _ -> p
+
+instance HasPosition ClsStmt where
+  hasPosition = \case
+    FnProp p _ -> p
+    AttrProp p _ _ -> p
+
+instance HasPosition FnDef where
+  hasPosition = \case
     FnDef p _ _ _ _ -> p
 
 instance HasPosition Arg where
@@ -136,6 +173,7 @@ instance HasPosition Stmt where
     CondElse p _ _ _ -> p
     While p _ _ -> p
     SExp p _ -> p
+    For p _ _ _ _ -> p
 
 instance HasPosition Item where
   hasPosition = \case
@@ -148,7 +186,11 @@ instance HasPosition Type where
     Str p -> p
     Bool p -> p
     Void p -> p
+    Array p _ -> p
+    ClsType p _ -> p
     Fun p _ _ -> p
+    Arr p _ _ -> p
+    VTable p _ -> p
 
 instance HasPosition Expr where
   hasPosition = \case
@@ -158,6 +200,12 @@ instance HasPosition Expr where
     ELitFalse p -> p
     EApp p _ _ -> p
     EString p _ -> p
+    ENewArr p _ _ -> p
+    EArrGet p _ _ -> p
+    ENewCls p _ -> p
+    EProp p _ _ -> p
+    EPropApp p _ _ _ -> p
+    ENull p _ -> p
     Neg p _ -> p
     Not p _ -> p
     EMul p _ _ _ -> p

@@ -4,9 +4,21 @@ entrypoints Program ;
 
 Program.   Program ::= [TopDef] ;
 
-FnDef.	   TopDef ::= Type Ident "(" [Arg] ")" Block ;
+TopFnDef.  TopDef ::= FnDef ;
+
+ClsExtDef. TopDef ::= "class" Ident "extends" Ident "{" [ClsStmt] "}" ;
+
+ClsDef.    TopDef ::= "class" Ident "{" [ClsStmt] "}" ;
 
 separator nonempty TopDef "" ;
+
+FnProp.    ClsStmt ::= FnDef ;
+
+AttrProp.  ClsStmt ::= Type Ident ";" ;
+
+separator nonempty ClsStmt "" ;
+
+FnDef.	   FnDef ::= Type Ident "(" [Arg] ")" Block ;
 
 Arg. 	   Arg ::= Type Ident;
 
@@ -30,11 +42,11 @@ Init.      Item ::= Ident "=" Expr ;
 
 separator nonempty Item "," ;
 
-Ass.       Stmt ::= Ident "=" Expr  ";" ;
+Ass.       Stmt ::= Expr "=" Expr  ";" ;
 
-Incr.      Stmt ::= Ident "++"  ";" ;
+Incr.      Stmt ::= Expr "++"  ";" ;
 
-Decr.      Stmt ::= Ident "--"  ";" ;
+Decr.      Stmt ::= Expr "--"  ";" ;
 
 Ret.       Stmt ::= "return" Expr ";" ;
 
@@ -48,6 +60,8 @@ While.     Stmt ::= "while" "(" Expr ")" Stmt ;
 
 SExp.      Stmt ::= Expr  ";" ;
 
+For.       Stmt ::= "for" "(" Type Ident ":" Expr ")" Stmt ; 
+
 -- Types ---------------------------------------------------
 
 Int.       Type ::= "int" ;
@@ -58,7 +72,15 @@ Bool.      Type ::= "boolean" ;
 
 Void.      Type ::= "void" ;
 
+Array.     Type ::= Type "[]" ;
+
+ClsType.   Type ::= Ident ;
+
 internal   Fun. Type ::= Type "(" [Type] ")" ;
+
+internal   Arr. Type ::= Type "[" Integer "]" ;
+
+internal   VTable. Type ::= Ident ;
 
 separator  Type "," ;
 
@@ -75,6 +97,18 @@ ELitFalse. Expr6 ::= "false" ;
 EApp.      Expr6 ::= Ident "(" [Expr] ")" ;
 
 EString.   Expr6 ::= String ;
+
+ENewArr.   Expr6 ::= "new" Type "[" Expr "]" ;
+
+EArrGet.   Expr6 ::= Expr6 "[" Expr "]" ;
+
+ENewCls.   Expr6 ::= "new" Type ;
+
+EProp.     Expr6 ::= Expr6 "." Ident ;
+
+EPropApp.  Expr6 ::= Expr6 "." Ident "(" [Expr] ")" ;
+
+ENull.     Expr6 ::= "(" Ident ")" "null" ;
 
 Neg.       Expr5 ::= "-" Expr6 ;
 

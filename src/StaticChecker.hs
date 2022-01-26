@@ -118,6 +118,77 @@ evalExp (EOr pos lhs rhs) = do
     if (lhsT == BoolT && rhsT == lhsT)
         then return (BoolT, booleanBinaryOp (||) lhsV rhsV)
         else throwSCError pos $ OrParamsTypeMismatchError lhsT rhsT
+evalExp (ENewArr pos t exp) = do
+    (expT, _) <- evalExp exp
+    case expT of
+        IntT -> return (ArrayT t, Nothing)
+        _ -> throwSCError pos ArrayIndexTypeMismatchError
+evalExp (EArrGet pos exp i) = do
+    (iT, _) <- evalExp i
+    when (iT /= IntT) $ throwSCError pos ArrayIndexTypeMismatchError
+    (expT, _) <- evalExp exp
+    case expT of
+        (ArrayT t) -> return (getVarTFromType t, Nothing)
+        _ -> throwSCError pos $ ArrTypeMismatchError expT
+evalExp (ENewCls p1 (ClsType p2 ident)) = do
+    s <- get
+    case Map.lookup ident (cEnv s) of
+        Just entry -> return (ClassT ident, Nothing)
+        Nothing -> throwSCError p2 $ UnknownClassInitError ident
+evalExp (EProp pos exp ident) = do
+    (expT, _) <- evalExp exp
+    case expT of
+        (ArrayT _) -> do
+            unless (ident == Ident "length") $ throwSCError pos $ InvalidArrayAttrError ident
+            return (IntT, Nothing)
+        (ClassT cls) -> do
+            s <- get
+            case Map.lookup cls (cEnv s) of 
+                Just c -> case Map.lookup ident (cVEnv c) of
+                    Just p -> return (p, Nothing)
+                    _ -> throwSCError pos $ UnknownClassAttributeError cls ident
+                _ -> throwSCError pos $ UnknownClassNameError cls
+        _ -> throwSCError pos $ NonObjectTypeError expT
+evalExp (EPropApp pos exp ident args) = do
+    (expT, _) <- evalExp exp
+    case expT of
+        (ClassT cls) -> do
+            (cVEnv, cFEnv) <- getClassEnvs pos cls
+            s <- get
+            let cs = SCState {
+                cEnv = (cEnv s),
+                fEnv = (Map.union cFEnv (fEnv s)),
+                localStore = (localStore s),
+                vEnv = (Map.union cVEnv (vEnv s)),
+                retT = (retT s),
+                returned = (returned s)
+            }
+            put cs
+            app <- evalExp (EApp pos ident args)
+            put s
+            return app
+        _ -> throwSCError pos $ NonMethodTypeError expT
+evalExp (ENull pos ident) = do
+    s <- get
+    case Map.lookup ident (cEnv s) of
+        Just c -> return ((ClassT ident), Nothing)
+        _ -> throwSCError pos InvalidNullCastError
+
+getClassEnvs :: BNFC'Position -> Ident -> SC (VarEnv, FunEnv)
+getClassEnvs pos ident = do
+    ct <- getClsT pos ident
+    case superName ct of
+        Just p -> do 
+            (pVEnv, pFEnv) <- getClassEnvs pos p
+            return (Map.union (cVEnv ct) pVEnv, Map.union (cFEnv ct) pFEnv)
+        _ -> return (cVEnv ct, cFEnv ct)
+
+getClsT :: BNFC'Position -> Ident -> SC ClsT
+getClsT pos ident = do 
+    s <- get
+    case Map.lookup ident (cEnv s) of
+        Just c -> return c
+        _ -> throwSCError pos $ UnknownClassNameError ident
 
 assertArgsT :: BNFC'Position -> ArgsT -> [Expr] -> SC ()
 assertArgsT pos [] [] = return ()
@@ -213,6 +284,17 @@ evalStmt (While pos exp stmt) = do
         gets returned
     when ((expV == Just (BoolV True)) && ret) $ modify (\s -> s {returned = True})
 evalStmt (SExp pos exp) = void $ evalExp exp
+evalStmt (For pos t i exp stmt) = do
+    (expT, expV) <- evalExp exp
+    case expT of
+        (ArrayT _) -> do
+            s <- get
+            ret <- sandbox $ do
+                void $ storeVar pos i (getVarTFromType t)
+                evalStmt stmt
+                gets returned
+            when (ret) $ modify (\s -> s {returned = True})
+        _ -> throwSCError pos $ NonIterableForError expT
 
 evalBlockStmt :: Block -> SC ()
 evalBlockStmt (Block _ stmts) = evalStmtList stmts
@@ -236,21 +318,34 @@ storeVar pos ident t = do
         throwSCError pos $ MultipleVarDeclError ident
     when (t == NoneT || t == VoidT) $
         throwSCError pos $ VarTypeMismatchError
-    put $ SCState (fEnv state) (Set.insert ident (localStore state)) (Map.insert ident t (vEnv state)) (retT state) (returned state)
+    put $ SCState (cEnv state) (fEnv state) (Set.insert ident (localStore state)) (Map.insert ident t (vEnv state)) (retT state) (returned state)
 
 evalTopDefList :: [TopDef] -> SC ()
 evalTopDefList [] = return ()
 evalTopDefList (dHead : dTail) = evalTopDef dHead >> evalTopDefList dTail
-    where
-        evalTopDef :: TopDef -> SC ()
-        evalTopDef (FnDef pos t ident args block) = do
-            let retT = getVarTFromType t
-            sandbox $ do
-                modify (\s -> s {retT = retT})
-                evalArgs args
-                evalBlockStmt block
-                returned <- gets returned
-                when (VoidT /= retT && not returned) $ throwSCError pos $ NoReturnError ident
+
+evalTopDef :: TopDef -> SC ()
+evalTopDef (TopFnDef pos fnDef) = evalFnDef fnDef
+evalTopDef (ClsDef pos ident stmts) = do
+    (cVEnv, cFEnv) <- getClassEnvs pos ident
+    mapM_ (\f -> do
+        sandbox $ do
+            modify (\s -> s {vEnv = cVEnv})
+            void $ storeVar pos (Ident "this") (ClassT ident)
+            evalFnDef f) [fnDef | (FnProp _ fnDef) <- stmts]
+evalTopDef (ClsExtDef pos ident super stmts) = do
+    void $ getClassEnvs pos super
+    evalTopDef (ClsDef pos ident stmts)
+
+evalFnDef :: FnDef -> SC ()
+evalFnDef (FnDef pos t i args b) = do
+    let retT = getVarTFromType t
+    sandbox $ do
+        modify (\s -> s {retT = retT})
+        evalArgs args
+        evalBlockStmt b
+        returned <- gets returned
+        when (VoidT /= retT && not returned) $ throwSCError pos $ NoReturnError i
 
 evalArgs :: [Arg] -> SC ()
 evalArgs [] = return ()
@@ -264,7 +359,20 @@ evalArgs (aHead : aTail) = evalArg aHead >> evalArgs aTail
 storeFun :: FunId -> FunT -> SC ()
 storeFun funId funT = do
     state <- get
-    put $ SCState (Map.insert funId funT (fEnv state)) (localStore state) (vEnv state) (retT state) (returned state)
+    put $ SCState (cEnv state) (Map.insert funId funT (fEnv state)) (localStore state) (vEnv state) (retT state) (returned state)
+
+storeClass :: Ident -> Maybe Ident -> [ClsStmt] -> SC ()
+storeClass ident super stmts = do
+    st <- get
+    let cVEnv = Map.fromList [(i, getVarTFromType t) | (AttrProp _ t i) <- stmts]
+    let funPairs = [(i, (getVarTFromType t, map (\(Arg _ argT _) -> getVarTFromType argT) args)) | (FnProp _ (FnDef _ t i args _)) <- stmts]
+    let cFEnv = Map.fromList funPairs
+    let cls = ClsT {
+        superName = super,
+        cVEnv = cVEnv,
+        cFEnv = cFEnv
+    }
+    modify (\s -> s {cEnv = Map.insert ident cls (cEnv st)})
 
 builtins :: [(FunId, FunT)]
 builtins = [
@@ -279,11 +387,11 @@ initBuiltins :: [(FunId, FunT)] -> SC ()
 initBuiltins [] = return ()
 initBuiltins ((funId, funT) : bTail) = storeFun funId funT >> initBuiltins bTail
 
-evalFunDeclList :: [TopDef] -> SC ()
+evalFunDeclList :: [FnDef] -> SC ()
 evalFunDeclList [] = return ()
 evalFunDeclList (dHead : dTail) = evalFunDecl dHead >> evalFunDeclList dTail
     where
-        evalFunDecl :: TopDef -> SC ()
+        evalFunDecl :: FnDef -> SC ()
         evalFunDecl (FnDef pos t funId args block) = do
             env <- get
             if Map.member funId (fEnv env)
@@ -297,10 +405,18 @@ evalFunDeclList (dHead : dTail) = evalFunDecl dHead >> evalFunDeclList dTail
                     storeFun funId (retT, argsT)
 
 evalProgram :: Program -> SC ()
-evalProgram (Program pos defList) = do
+evalProgram (Program pos topDefs) = do
+    let fs = [fnDef | (TopFnDef _ fnDef) <- topDefs]
+    let cs = filter (\d -> case d of
+            (TopFnDef _ _) -> False
+            _ -> True) topDefs
     initBuiltins builtins
-    evalFunDeclList defList
-    evalTopDefList defList
+    evalFunDeclList fs
+    mapM_ (\clsD -> case clsD of
+        (ClsDef _ ident stmts) -> storeClass ident Nothing stmts
+        (ClsExtDef _ ident super stmts) -> storeClass ident (Just super) stmts
+        ) cs
+    evalTopDefList topDefs
     getFunT (Just (0, 0)) (Ident "main")
     return ()
 
@@ -314,6 +430,7 @@ exitWithErrorMsg msg = do
 runEvaluation :: Program -> IO ()
 runEvaluation p = do
     let initState = SCState {
+        cEnv = Map.empty,
         fEnv = Map.empty,
         localStore = Set.empty,
         vEnv = Map.empty,
