@@ -13,18 +13,18 @@ data VarT = VarT {
 
 data ClsFunT = ClsFunT {
     clsFunRetT :: Type,
-    vmid :: Maybe Int,
+    vmid :: Maybe Integer,
     cls :: Ident
 } deriving Show
 
-type ClsFnEnv = Map.Map Ident ClsFunT
+type ClsFunEnv = Map.Map Ident ClsFunT
 
 data ClsT = ClsT {
     super :: Maybe Ident,
     vEnv :: VarEnv,
     fEnv :: ClsFunEnv,
-    nextVM :: Int,
-    align :: Int
+    nextVM :: Integer,
+    align :: Integer
 } deriving Show
 
 type VarEnv = Map.Map Ident VarT

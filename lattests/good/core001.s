@@ -8,6 +8,7 @@ LStr2:
 .string "hello */"
 LStr3:
 .string "/* world"
+
 main:
     pushl %ebp
     movl %esp, %ebp

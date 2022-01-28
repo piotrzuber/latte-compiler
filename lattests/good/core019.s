@@ -2,6 +2,7 @@
 
 LStr0:
 .string "foo"
+
 main:
     pushl %ebp
     movl %esp, %ebp

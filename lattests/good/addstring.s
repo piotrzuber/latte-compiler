@@ -4,6 +4,7 @@ LStr0:
 .string "fun"
 LStr1:
 .string "bub"
+
 main:
     pushl %ebp
     movl %esp, %ebp

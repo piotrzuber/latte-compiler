@@ -4,6 +4,7 @@ LStr0:
 .string "bad"
 LStr1:
 .string "good"
+
 main:
     pushl %ebp
     movl %esp, %ebp

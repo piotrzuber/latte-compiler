@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Monad.Except
 import Control.Monad.State
 import qualified Data.Map as Map
+import Data.Maybe
 import qualified Data.Set as Set
 import qualified Data.List as List
 import System.Exit
@@ -25,24 +26,24 @@ nextLabelId = do
 getVarT :: Ident -> CMonad Type
 getVarT ident = do
     s <- get
-    if M.member ident (varEnv s) then
+    if Map.member ident (varEnv s) then
         return $ vType $ (varEnv s) Map.! ident
     else
-        getExprType (EProp Nothing (EVar Nothing (Ident "this")) ident)
+        evalExpType (EProp Nothing (EVar Nothing (Ident "self")) ident)
 
-getTypeSize :: Type -> Int
-getTypeSize (Array _) = 8
-getTypeSize Bool = 4
-getTypeSize (ClsType _) = 4
-getTypeSize Int = 4
-getTypeSize Str = 4
+getTypeSize :: Type -> Integer
+getTypeSize (Array _ _) = 8
+getTypeSize (Bool _) = 4
+getTypeSize (ClsType _ _) = 4
+getTypeSize (Int _) = 4
+getTypeSize (Str _) = 4
 getTypeSize _ = 0
 
 getVarOff :: Ident -> CMonad Integer
 getVarOff ident = do
     s <- get
-    return $ varOff $ case Map.lookup ident (varEnv s) of
-        Just var -> v
+    return $ offset $ case Map.lookup ident (varEnv s) of
+        Just var -> var
         _ -> error "VarOff lookup error"
 
 compExp :: Expr -> CMonad Instruction
@@ -50,7 +51,10 @@ compExp (EVar pos ident) = do
     t <- getVarT ident
     case t of
         Array _ _ -> do
-            compdVar <- 
+            compdVar <- pushVar pos ident 0
+            compdLen <- pushVar pos ident 4
+            return $ IBlock [compdLen, compdVar]
+        _ -> pushVar pos ident 0
 compExp (ELitInt _ i) = return $ getPushl $ "$" ++ show i
 compExp (ELitTrue _) = return $ getPushl "$1"
 compExp (ELitFalse _) = return $ getPushl "$0"
@@ -73,53 +77,137 @@ compExp (EMul _ exp1 op exp2) = compBinaryOp (BinMul op) exp1 exp2
 compExp (ERel _ exp1 op exp2) = compBinaryOp (BinRel op) exp1 exp2
 compExp (EAnd pos exp1 exp2) = compBooleanExp $ EAnd pos exp1 exp2
 compExp (EOr pos exp1 exp2) = compBooleanExp $ EOr pos exp1 exp2
+compExp (ENewArr _ t exp) = do
+    compdExp <- compExp exp
+    return $ IBlock [getPushl $ "$" ++ show (getTypeSize t), compdExp, getCall "calloc", getPopl $ show EDX, getPopl $ show ECX, getPushl $ show EDX, getPushl $ show EAX]
+compExp (EArrGet _ e1 e2) = do
+    compdArrGet <- compLValue $ EArrGet Nothing e1 e2
+    return $ IBlock [compdArrGet, getPopl $ show EAX, getPushl $ "(" ++ show EAX ++ ")"]
+compExp (ENewCls _ (ClsType _ name)) = do
+    ct <- evalClassType name
+    hasVT <- hasVTable name
+    let v = if hasVT then "$" ++ getVTable name else "$0"
+    return $ IBlock [getPushl "$4", getPushl $ "$" ++ show (align ct), getCall "calloc", getPopl $ show ECX, getPopl $ show ECX, getMovl v "(%eax)", getPushl $ show EAX]
+compExp (EProp _ exp ident) = do
+    t <- evalExpType exp
+    case t of
+        (Array _ _ ) -> do
+            compdExp <- compLValue exp
+            return $ IBlock [compdExp, getPopl $ show EAX, getPushl "4(%eax)"]
+        _ -> do
+            compdExp <- compLValue (EProp Nothing exp ident)
+            return $ IBlock [compdExp, getPopl $ show EAX, getPushl $ "(" ++ show EAX ++ ")"]
+compExp (EPropApp _ lval i@(Ident ident) args) = do
+    compdLval <- compLValue lval
+    lt <- evalExpType lval
+    let cname = case lt of
+            (ClsType _ cname) -> cname
+            _ -> error "EPropApp cname type error"
+    ct <- evalClassType cname
+    let (ClsFunT rt vt (Ident cls)) = case Map.lookup i (fEnv ct) of
+            (Just e) -> e
+            _ -> error "EPropApp lookup error"
+    let prepRegs = case rt of
+            (Void _) -> [getPopl $ show ECX] 
+            _ -> [getPopl $ show ECX, getPopl $ show ECX, getPushl $ show EAX]
+    case vt of
+        (Just vid) -> do
+            compdFunApp <- compFunApp (Ident $ "*" ++ show (4 * vid) ++ "(%edx)") args rt
+            return $ IBlock [compdLval, getPopl $ show EAX, getMovl "(%eax)" (show ECX), getMovl "(%ecx)" (show EDX), getPushl "(%eax)", compdFunApp, IBlock prepRegs]
+        _ -> do
+            compdFunApp <- compFunApp (Ident (cls ++ "$" ++ ident)) args rt
+            return $ IBlock [compdLval, getPopl $ show EAX, getPushl "(%eax)", compdFunApp, IBlock prepRegs]
+compExp (ENull _ ident) = return $ getPushl "$0"
+
+hasVTable :: Ident -> CMonad Bool
+hasVTable ident = do
+    ct <- evalClassType ident
+    return $ not $ null $ filter (\(ClsFunT _ vt _) -> isJust vt) $ Map.elems (fEnv ct)
+
+getVTable :: Ident -> String
+getVTable (Ident ident) = "." ++ ident ++ "_vtable"
+
+initVTables :: CMonad Instruction
+initVTables = do
+    s <- get
+    compdInit <- mapM initVTable $ Map.keys (clsEnv s)
+    return $ IBlock compdInit
+
+initVTable :: Ident -> CMonad Instruction
+initVTable ident = do
+    ct <- evalClassType ident
+    let v = List.sort $ map castFunToVirtual [(fn, ft) | (fn, ft) <- Map.toList (fEnv ct), isJust (vmid ft)]
+    let vs = foldl (\red (_, id) -> red ++ "," ++ id) "" v
+    if not $ null vs then
+        return $ NoIndent $ getVTable ident ++ ": .int " ++ tail vs
+    else
+        return EmptyIns
+
+castFunToVirtual :: (Ident, ClsFunT) -> (Integer, String)
+castFunToVirtual (fn, ft) = (fromJust (vmid ft), unwrapIdent (cls ft) ++ "$" ++ unwrapIdent fn)
+
+unwrapIdent :: Ident -> String
+unwrapIdent (Ident ident) = ident
 
 compFunApp :: Ident -> [Expr] -> Type -> CMonad Instruction
 compFunApp (Ident ident) args retT = do
     compdArgs <- mapM compExp args
-    let argsLen = List.length args
+    argsLen <- getArgsSize args
     let compdPopArgs = getAddl ("$" ++ (show (argsLen * 4))) (show ESP)
     let compdApp = IBlock [IBlock compdArgs, getCall ident, compdPopArgs]
     case retT of
+        Array _ _ -> return $ IBlock [compdApp, getPushl $ show EDX, getPushl $ show EAX]
         Void _ -> return compdApp
         _ -> return $ IBlock [compdApp, getPushl $ show EAX]
+
+getArgsSize :: [Expr] -> CMonad Integer
+getArgsSize [] = return 0
+getArgsSize (eHead:eTail) = do
+    t <- evalExpType eHead
+    tailSize <- getArgsSize eTail
+    case t of 
+        Array _ _ -> return $ 2 + tailSize
+        _ -> return $ 1 + tailSize
 
 pushVar :: BNFC'Position -> Ident -> Integer -> CMonad Instruction
 pushVar pos ident off = do
     s <- get
     if Map.member ident (varEnv s) then do
-        compdVar = pushVarContent ident off
+        compdVar <- pushVarContent ident off
         return $ getPushl compdVar
     else 
-        compExp (EProp Nothing (EVar Nothing (Ident "this")) ident)
+        compExp (EProp Nothing (EVar Nothing (Ident "self")) ident)
 
 pushVarContent :: Ident -> Integer -> CMonad String
 pushVarContent ident off = do
     vo <- getVarOff ident
-    return $ show (vo ++ off) ++ "(" ++ show EBP ++ ")"
+    return $ show (vo + off) ++ "(" ++ show EBP ++ ")"
 
 compLValue :: Expr -> CMonad Instruction
-compLValue (EVar ident) = do
+compLValue (EVar _ ident) = do
     s <- get
     if Map.member ident (varEnv s) then do
         compdVarS <- pushVarContent ident 0
         return $ IBlock [getLeal compdVarS (show EAX), getPushl $ show EAX]
     else
-        compLValue $ EProp _ (EVar _ (Ident "this")) ident
+        compLValue $ EProp Nothing (EVar Nothing (Ident "self")) ident
 compLValue (EArrGet _ a i) = do
     compdArr <- compLValue a
     compdIdx <- compExp i
-    return $ IBlock [compdArr, compdIdx, getPopl (show EAX), getPopl (show EBX), 
-        getMovl ("(" ++ show EBX ++ ")") (show ECX), getLeal "(%ecx, %eax, 4)" (show EBX), getPushl EBX]
+    return $ IBlock [compdArr, compdIdx, getPopl (show EAX), getPopl (show EDX), 
+        getMovl ("(" ++ show EDX ++ ")") (show ECX), getLeal "(%ecx, %eax, 4)" (show EDX), getPushl $ show EDX]
 compLValue (EProp _ exp ident) = do
-    (ClsType _ cls) <- evalExpType exp
+    et <- evalExpType exp
+    let cls = case et of
+            (ClsType _ cls) -> cls
+            _ -> error "EProp exp type error"
     compdExp <- compLValue exp
     ct <- evalClassType cls
     let varOff = offset $ case Map.lookup ident (vEnv ct) of
-        Just vo -> vo
-        _ -> error "Eprop lvalue lookup error"
+            Just vo -> vo
+            _ -> error "Eprop lvalue lookup error"
     return $ IBlock [compdExp, getPopl (show EAX), getMovl ("(" ++ (show EAX) ++ ")") (show ECX),
-        getLeal (show varOff ++ "(" ++ show ECX ++ ")"), getPushl $ show EAX]
+        getLeal (show varOff ++ "(" ++ show ECX ++ ")") (show EAX), getPushl $ show EAX]
 compLValue e@(EApp _ ident args) = compExp e
 
 evalRetType :: BNFC'Position -> Ident -> CMonad Type
@@ -208,32 +296,39 @@ evalExpType (EAdd _ _ (Minus _) exp) = return $ Int Nothing
 evalExpType (ERel _ _ _ _) = return $ Bool Nothing
 evalExpType (EAnd _ _ _ ) = return $ Bool Nothing
 evalExpType (EOr _ _ _ ) = return $ Bool Nothing
-evalExpType (ENewArr _ t _) = return t
+evalExpType (ENewArr _ t _) = return $ Array Nothing t
 evalExpType (EArrGet _ exp _) = do
-    (Array t) <- evalExpType exp
-    return t
-evalExpType (ENewCls _ (ClsType ident)) = return $ ClsType ident
+    t <- evalExpType exp
+    case t of
+        (Array _ at) -> return at
+        _ -> error "EArrGet type error" 
+evalExpType (ENewCls _ (ClsType _ ident)) = return $ ClsType Nothing ident
 evalExpType (EProp _ exp ident) = do
     t <- evalExpType exp
     case t of
         (ClsType _ name) -> do
-            ct <- evalClassType ident
-            return $ vType $ case M.lookup ident (vEnv ct) of
+            ct <- evalClassType name
+            return $ vType $ case Map.lookup ident (vEnv ct) of
                 Just t' -> t'
                 _ -> error "EProp lookup error"
-        (Array _ _) -> return Int
+        (Array _ _) -> return $ Int Nothing
 evalExpType (EPropApp _ exp ident _) = do
-    (ClsType _ name) <- evalExpType exp
+    et <- evalExpType exp
+    let name = case et of
+            (ClsType _ name) -> name
+            _ -> error "EPropApp type error"
     ct <- evalClassType name
     case Map.lookup ident (fEnv ct) of
-        (Just t) -> t
+        (Just t) -> return $ clsFunRetT t
         _ -> error "EPropApp lookup error"
-evalExpType (ENull _ ident) = return $ ClsType ident
+evalExpType (ENull _ ident) = return $ ClsType Nothing ident
 
 evalClassType :: Ident -> CMonad ClsT
 evalClassType ident = do
     s <- get
-    return $ (clsEnv s) M.! ident
+    case Map.lookup ident (clsEnv s) of
+        (Just ct) -> return ct
+        _ -> error $ "evalClassType lookup error: " ++ unwrapIdent ident
 
 compStmt :: Stmt -> CMonad Instruction
 compStmt (Empty _) = return EmptyIns
@@ -241,40 +336,35 @@ compStmt (BStmt _ (Block _ stmts)) = do
     s <- get
     compdBlock <- mapM compStmt stmts
     labelId <- nextLabelId
-    put $ CState (varEnv s) (funRetEnv s) (strEnv s) (minStack s) (maxStack s) labelId
+    put $ CState (clsEnv s) (varEnv s) (funRetEnv s) (strEnv s) (minStack s) (maxStack s) labelId
     return $ IBlock compdBlock
 compStmt (Decl _ t items) = do 
     s <- get
     let stack = minStack s
     (compdItems, _) <- evalItemList t items stack
     return compdItems
-compStmt (Ass _ ident exp) = do 
-    t <- evalExpType exp
-    compdIdent <- do
-        s <- get
-        let varOff = offset $ (varEnv s) Map.! ident
-        let compdVar = show varOff ++ "(" ++ show EBP ++ ")"
-        return $ IBlock [getLeal compdVar $ show EAX, getPushl $ show EAX]
-    compdExp <- compExp exp
-    return $ IBlock [compdIdent, compdExp, getPopl $ show EAX, getPopl $ show ECX, 
-        getMovl (show EAX) ("(" ++ show ECX ++ ")")]
-compStmt (Incr _ ident) = do
-    compdIdent <- do
-        s <- get
-        let varOff = offset $ (varEnv s) Map.! ident
-        let compdVar = show varOff ++ "(" ++ show EBP ++ ")"
-        return $ IBlock [getLeal compdVar (show EAX), getPushl $ show EAX]
-    return $ IBlock [compdIdent, getPopl $ show EAX, getIncl ("(" ++ show EAX ++ ")")]
-compStmt (Decr _ ident) = do
-    compdIdent <- do
-        s <- get
-        let varOff = offset $ (varEnv s) Map.! ident
-        let compdVar = show varOff ++ "(" ++ show EBP ++ ")"
-        return $ IBlock [getLeal compdVar (show EAX), getPushl $ show EAX]
-    return $ IBlock [compdIdent, getPopl $ show EAX, getDecl ("(" ++ show EAX ++ ")")]
+compStmt (Ass _ e1 e2) = do 
+    t <- evalExpType e2
+    compdE1 <- compLValue e1
+    compdE2 <- compExp e2
+    case t of
+        (Array _ _) -> return $ IBlock [compdE1, compdE2, getPopl $ show EAX, getPopl $ show EDX,
+            getPopl $ show ECX, getMovl (show EAX) ("(" ++ show ECX ++ ")"), getAddl "$4" (show ECX),
+            getMovl (show EDX) ("(" ++ show ECX ++ ")")]
+        _ -> return $ IBlock [compdE1, compdE2, getPopl $ show EAX, getPopl $ show ECX, 
+            getMovl (show EAX) ("(" ++ show ECX ++ ")")]
+compStmt (Incr _ exp) = do
+    compdExp <- compLValue exp
+    return $ IBlock [compdExp, getPopl $ show EAX, getIncl ("(" ++ show EAX ++ ")")]
+compStmt (Decr _ exp) = do
+    compdExp <- compLValue exp
+    return $ IBlock [compdExp, getPopl $ show EAX, getDecl ("(" ++ show EAX ++ ")")]
 compStmt (Ret _ exp) = do
+    t <- evalExpType exp
     compdExp <- compExp exp
-    return $ IBlock [compdExp, getPopl $ show EAX, getLeave, getRet]
+    case t of 
+        (Array _ _) -> return $ IBlock [compdExp, getPopl $ show EAX, getPopl $ show EDX, getLeave, getRet]
+        _ -> return $ IBlock [compdExp, getPopl $ show EAX, getLeave, getRet]
 compStmt (VRet _) = return $ IBlock [getLeave, getRet]
 compStmt (Cond _ exp stmt) = do
     trueL <- nextLabelId
@@ -301,6 +391,28 @@ compStmt (While _ exp stmt) = do
     return $ IBlock [getLabelDecl condL, compdExp, getLabelDecl loopL, 
         compdStmt, uncondJmp condL, getLabelDecl finallyL]
 compStmt (SExp _ exp) = compExp exp
+compStmt (For _ t i exp stmt) = do
+    s <- get
+    modify (\s -> s {maxStack = (maxStack s) + 1})
+    compdBlock <- compStmt $ getForAbs t i exp stmt
+    lid <- nextLabelId
+    put s
+    modify (\s -> s {label = lid})
+    return compdBlock
+
+getForAbs :: Type -> Ident -> Expr -> Stmt -> Stmt
+getForAbs t i exp stmt = BStmt Nothing $ 
+    Block Nothing [
+        Decl Nothing (Int Nothing) [Init Nothing (getIterator i) (ELitInt Nothing 0)],
+        While Nothing (ERel Nothing (EVar Nothing (getIterator i)) (LTH Nothing) (EProp Nothing exp (Ident "length"))) $ BStmt Nothing $ Block Nothing [
+            Decl Nothing t [Init Nothing i (EArrGet Nothing exp (EVar Nothing (getIterator i)))],
+            stmt,
+            Incr Nothing (EVar Nothing (getIterator i))
+            ]
+        ]
+
+getIterator :: Ident -> Ident
+getIterator (Ident ident) = Ident ("iterator_" ++ ident)
 
 evalItemList :: Type -> [Item] -> Integer -> CMonad (Instruction, Integer)
 evalItemList _ [] stack = return (EmptyIns, stack)
@@ -321,12 +433,15 @@ evalItem t item size = do
     s <- get
     put $ CState (clsEnv s) (Map.insert ident (getNewVar t (size - sizeOfVar)) (varEnv s)) (funRetEnv s) (strEnv s) (min (size - sizeOfVar) (minStack s)) (maxStack s) (label s)
     updatedState <- get
-    let varOff = offset $ (varEnv updatedState) Map.! ident
-    let compdVar = show varOff ++ "(" ++ show EBP ++ ")"
-    return (IBlock [compdDecl, getPopl compdVar], size - 4)
+    compdVar <- pushVarContent ident 0
+    case t of
+        (Array _ _) -> do
+            compdLen <- pushVarContent ident 4
+            return (IBlock [compdDecl, getPopl compdVar, getPopl compdLen], size - sizeOfVar)
+        _ -> return (IBlock [compdDecl, getPopl compdVar], size - sizeOfVar)
 
 getInitValue :: Type -> Expr
-getInitValue (Array _ t) -> ENewArr t (ELitInt 0)
+getInitValue (Array _ t) = ENewArr Nothing t (ELitInt Nothing 0)
 getInitValue (Str _) = EString Nothing ""
 getInitValue _ = ELitInt Nothing 0
 
@@ -337,13 +452,18 @@ getNewVar t off = VarT {
 }
 
 compTopDef :: TopDef -> CMonad Instruction
-compTopDef (FnDef _ t i@(Ident ident) args b@(Block _ block)) = do
+compTopDef (TopFnDef _ (FnDef _ t i@(Ident ident) args b@(Block _ block))) = do
     let funL = NoIndent $ ident ++ ":"
-    prepareArgs 4 $ reverse args
+    size <- prepareArgs 4 $ reverse args
     s <- get
+    when (Map.member (Ident "self") (varEnv s)) (do
+        let (VarT vt vo) = (varEnv s) Map.! (Ident "self")
+        when (vo < 0) (
+            modify (\s -> s {varEnv = Map.insert (Ident "self") (getNewVar vt (size + getTypeSize vt)) (varEnv s)})
+            ))
     compdBlock <- compFun b
     blockS <- get
-    put $ CState (varEnv s) (funRetEnv s) (strEnv s) (minStack s) (maxStack s) (label blockS)
+    put $ CState (clsEnv s) (varEnv s) (funRetEnv s) (strEnv s) (minStack s) (maxStack s) (label blockS)
     if not $ null block then
         case last block of
             (Ret _ _)  -> return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock]
@@ -351,13 +471,30 @@ compTopDef (FnDef _ t i@(Ident ident) args b@(Block _ block)) = do
             _ -> return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock, getLeave, getRet]
     else
         return $ IBlock [funL, getPushl $ show EBP, getMovl (show ESP) (show EBP), compdBlock, getLeave, getRet]
+compTopDef (ClsDef _ i@(Ident cname) stmts) = do
+    s <- get
+    modify (\st -> st {varEnv = Map.insert (Ident "self") (getNewVar (ClsType Nothing i) (-1)) (varEnv s)})
+    compdFnProps <- mapM compTopDef [TopFnDef Nothing $ clsFnDef cname fnDef | (FnProp _ fnDef) <- stmts]
+    s2 <- get
+    put $ CState (clsEnv s) (varEnv s) (funRetEnv s) (strEnv s) (minStack s) (maxStack s) (label s2)
+    return $ IBlock compdFnProps
+compTopDef (ClsExtDef _ cname _ stmts) = compTopDef (ClsDef Nothing cname stmts)
+
+clsFnDef :: String -> FnDef -> FnDef
+clsFnDef cname (FnDef _ rt (Ident fn) args block) =
+    FnDef Nothing rt (Ident $ cname ++ "$" ++ fn) args block
 
 prepareArgs :: Integer -> [Arg] -> CMonad Integer
 prepareArgs s [] = return s
 prepareArgs size ((Arg _ tHead iHead) : aTail) = do
-    s <- get
-    put $ CState (Map.insert iHead (getNewVar tHead (size + 4)) (varEnv s)) (funRetEnv s) (strEnv s) (minStack s) (maxStack s) (label s)
-    prepareArgs (size + 4) aTail
+    st <- get
+    let s = getTypeSize tHead
+    let ex = case tHead of
+            Array _ _ -> 4
+            _ -> 0
+    let off = s + size - ex
+    put $ CState (clsEnv st) (Map.insert iHead (getNewVar tHead off) (varEnv st)) (funRetEnv st) (strEnv st) (minStack st) (maxStack st) (label st)
+    prepareArgs (size + s) aTail
 
 compFun :: Block -> CMonad Instruction
 compFun (Block _ stmts) = do
@@ -385,31 +522,93 @@ getVarsSize (sHead : sTail) size = case sHead of
         getVarsSize sTail updatedS
     (While _ _ stmt) -> getVarsSize (stmt:sTail) size
     (For _ t ident _ stmt) -> do
-        (,_ updatedS) <- evalItemList t [NoInit Nothing ident] size
-        (_, maxS) <- evalItemList Int [NoInit (Ident "dummy")] updatedS
-        getVarsSize (s:sTail) maxS
+        (_, updatedS) <- evalItemList t [NoInit Nothing ident] size
+        (_, maxS) <- evalItemList (Int Nothing) [NoInit Nothing (Ident "dummy")] updatedS
+        getVarsSize (stmt:sTail) maxS
     _ -> getVarsSize sTail size
 
 compProg :: Program -> CMonad Instruction
 compProg prog@(Program pos topDefs) = do
-    mapM_ prepareFunction topDefs
+    mapM_ prepareFunction [fnDef | (TopFnDef _ fnDef) <- topDefs]
     mapM_ prepareFunction builtins
+    prepareClasses prog
+    initVTables
     compdStrs <- prepareStrings prog
     compdTopDefs <- mapM compTopDef topDefs
-    return $ IBlock [compdStrs, IBlock compdTopDefs]
+    compdVTables <- initVTables
+    return $ IBlock [compdStrs, compdVTables, IBlock compdTopDefs]
 
-prepareFunction :: TopDef -> CMonad ()
+prepareFunction :: FnDef -> CMonad ()
 prepareFunction (FnDef _ t ident _ _ ) = do
     st <- get
     modify (\s -> s {funRetEnv = Map.insert ident t (funRetEnv st)})
 
-builtins :: [TopDef]
+builtins :: [FnDef]
 builtins = [
     FnDef Nothing (Void Nothing) (Ident "error") [] (Block Nothing [Empty Nothing]),
     FnDef Nothing (Void Nothing) (Ident "printInt") [Arg Nothing (Int Nothing) (Ident "num")] (Block Nothing [Empty Nothing]),
     FnDef Nothing (Int Nothing) (Ident "readInt") [] (Block Nothing [Empty Nothing]),
     FnDef Nothing (Void Nothing) (Ident "printString") [Arg Nothing (Str Nothing) (Ident "str")] (Block Nothing [Empty Nothing]),
     FnDef Nothing (Str Nothing) (Ident "readString") [] (Block Nothing [Empty Nothing])]
+
+prepareClasses :: Program -> CMonad ()
+prepareClasses (Program _ topDefs) = do
+    let extDefs = [(Just super, name, stmts) | (ClsExtDef _ name super stmts) <- topDefs]
+    let clsDefs = [(Nothing, name, stmts) | (ClsDef _ name stmts) <- topDefs]
+    let defs = extDefs ++ clsDefs
+    mapM_ prepareClass defs
+    s <- get
+    let clsStmts = Map.fromList [(ident, stmts) | (_, ident, stmts) <- defs]
+    let clsIdents = [ident | (_, ident, _) <- defs]
+    let subClss = [ident | ident <- clsIdents, ident `notElem` [sident | ClsT {super = Just sident} <- Map.elems (clsEnv s)]]
+    mapM_ (\i -> clsInit (Just i) Set.empty clsStmts) subClss
+
+prepareClass :: (Maybe Ident, Ident, [ClsStmt]) -> CMonad ()
+prepareClass (superi, ident, _) = do
+    s <- get
+    let cls = ClsT {
+        super = superi,
+        vEnv = Map.empty,
+        fEnv = Map.empty,
+        nextVM = (-1),
+        align = 0
+    }
+    modify (\st -> st {clsEnv = Map.insert ident cls (clsEnv s)})
+
+clsInit :: Maybe Ident -> Set.Set Ident -> Map.Map Ident [ClsStmt] -> CMonad (VarEnv, Integer)
+clsInit Nothing  _ _ = return (Map.empty, 4)
+clsInit (Just i) fset stmtsMap = do
+    ct <- evalClassType i
+    if nextVM ct >= 0 then 
+        return (vEnv ct, align ct)
+    else do
+        let defs = case Map.lookup i stmtsMap of
+                Just d -> d
+                _ -> error "clsInit stmtsMap lookup error"
+        let fs = [fnDef | (FnProp _ fnDef) <- defs]
+        let vars = [ap | ap@(AttrProp _ _ _) <- defs]
+        let fsetUpdate = Set.union fset $ Set.fromList [id | (FnDef _ _ id _ _) <- fs]
+        (superE, superS) <- clsInit (super ct) fsetUpdate stmtsMap
+        let (env, size) = foldl (\(e, s) (AttrProp _ t id) -> (Map.insert id (getNewVar t s) e, s + getTypeSize t)) (superE, superS) vars
+        (superFE, superVi) <- case super ct of
+            (Just super) -> do
+                pct <- evalClassType super
+                return (fEnv pct, nextVM pct)
+            _ -> return (Map.empty, 0)
+        let (fenv, virt) = foldl (\(fe, vi) (FnDef _ t fid _ _) -> 
+                case Map.lookup fid fe of
+                    Just ClsFunT {vmid = Just v} -> (Map.insert fid (ClsFunT t (Just v) i) fe, vi)
+                    _ -> (Map.insert fid (ClsFunT t (Just vi) i) fe, vi + 1)) (superFE, superVi) fs
+        st <- get
+        let c' = ClsT {
+            super = super ct,
+            vEnv = env,
+            fEnv = fenv,
+            nextVM = virt,
+            align = size
+        }
+        modify (\s -> s {clsEnv = Map.insert i c' (clsEnv st)})
+        return (env, size)
 
 prepareStrings :: Program -> CMonad Instruction
 prepareStrings prog = do
@@ -424,7 +623,13 @@ getStringsProgram :: Program -> [String]
 getStringsProgram (Program _ topDefs) = List.nub $ concatMap getStringsTopDef topDefs
 
 getStringsTopDef :: TopDef -> [String]
-getStringsTopDef (FnDef _ _ _ _ (Block _ stmts)) = concatMap getStringsStmt stmts
+getStringsTopDef (TopFnDef _ (FnDef _ _ _ _ (Block _ stmts))) = concatMap getStringsStmt stmts
+getStringsTopDef (ClsDef _ _ stmts) = concatMap getStringsClsStmt stmts
+getStringsTopDef (ClsExtDef _ _ _ stmts) = concatMap getStringsClsStmt stmts
+
+getStringsClsStmt :: ClsStmt -> [String]
+getStringsClsStmt (FnProp _ fnDef) = getStringsTopDef (TopFnDef Nothing fnDef)
+getStringsClsStmt _ = []
 
 getStringsStmt :: Stmt -> [String]
 getStringsStmt (BStmt _ (Block _ stmts)) = concatMap getStringsStmt stmts
@@ -437,6 +642,7 @@ getStringsStmt (CondElse _ exp s1 s2) = getStringsExp exp ++
     getStringsStmt s2
 getStringsStmt (While _ exp stmt) = getStringsExp exp ++ getStringsStmt stmt
 getStringsStmt (SExp _ exp) = getStringsExp exp
+getStringsStmt (For _ _ _ exp stmt) = getStringsExp exp ++ getStringsStmt stmt
 getStringsStmt _ = []
 
 getStringsItem :: Item -> [String]
@@ -459,11 +665,14 @@ prepareString label str = do
 declString :: String -> CMonad Instruction
 declString string = do
     s <- get
-    let stringL = (strEnv s) Map.! string
+    let stringL = case Map.lookup string (strEnv s) of
+            (Just l) -> l
+            _ -> error "declString lookup error"
     return $ IBlock [NoIndent (stringL ++ ":"), NoIndent $ ".string " ++ show string]
 
 compile :: Program -> String
 compile p = let initState = CState {
+    clsEnv = Map.empty,
     varEnv = Map.empty,
     funRetEnv = Map.empty,
     strEnv = Map.empty,

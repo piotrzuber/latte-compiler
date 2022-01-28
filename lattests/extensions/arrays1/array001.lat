@@ -7,6 +7,12 @@ int main() {
      j++;
   }
 
+  int k = 0;
+  while (k < a.length) {
+     printInt(a[k]);
+     k++;
+  }
+
   for (int x : a) 
      printInt(x);
 

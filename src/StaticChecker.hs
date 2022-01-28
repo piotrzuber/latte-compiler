@@ -121,14 +121,14 @@ evalExp (EOr pos lhs rhs) = do
 evalExp (ENewArr pos t exp) = do
     (expT, _) <- evalExp exp
     case expT of
-        IntT -> return (ArrayT t, Nothing)
+        IntT -> return (ArrayT $ getVarTFromType t, Nothing)
         _ -> throwSCError pos ArrayIndexTypeMismatchError
 evalExp (EArrGet pos exp i) = do
     (iT, _) <- evalExp i
     when (iT /= IntT) $ throwSCError pos ArrayIndexTypeMismatchError
     (expT, _) <- evalExp exp
     case expT of
-        (ArrayT t) -> return (getVarTFromType t, Nothing)
+        (ArrayT t) -> return (t, Nothing)
         _ -> throwSCError pos $ ArrTypeMismatchError expT
 evalExp (ENewCls p1 (ClsType p2 ident)) = do
     s <- get
@@ -195,7 +195,8 @@ assertArgsT pos [] [] = return ()
 assertArgsT pos (tHead : tTail) (eHead : eTail) = do
     _ <- assertArgsT pos tTail eTail
     (eType, _) <- evalExp eHead
-    unless (tHead == eType) $ throwSCError (hasPosition eHead) $ FunArgsTypeMismatchError tHead eType
+    tmis <- typesMismatch pos tHead eType
+    when (tmis) $ throwSCError (hasPosition eHead) $ FunArgsTypeMismatchError tHead eType
 assertArgsT pos _ _ = throwSCError pos FunArgsCountMismatchError
 
 integerBinaryOp :: IntBinFun -> Maybe VarV -> Maybe VarV -> Maybe VarV
@@ -235,23 +236,26 @@ evalStmt (Decl pos t items) = evalItemList (getVarTFromType t) items
                 evalItem t (NoInit pos ident) = storeVar pos ident t
                 evalItem t (Init pos ident exp) = do
                     (expT, _) <- evalExp exp
-                    when (t /= expT) $ throwSCError pos $ ItemInitTypeMismatchError t expT
+                    tmis <- typesMismatch pos t expT
+                    when (tmis) $ throwSCError pos $ ItemInitTypeMismatchError t expT
                     storeVar pos ident t
-evalStmt (Ass pos ident exp) = do 
-    varT <- getVarT pos ident
-    (expT, _) <- evalExp exp
-    when (varT /= expT) $ throwSCError pos AssTypeMismatchError
-evalStmt (Incr pos ident) = do
-    varT <- getVarT pos ident
-    when (varT /= IntT) $ throwSCError pos $ NonIntegerIncrParamError ident
-evalStmt (Decr pos ident) = do
-    varT <- getVarT pos ident
-    when (varT /= IntT) $ throwSCError pos $ NonIntegerDecrParamError ident
+evalStmt (Ass pos e1 e2) = do 
+    (t1, _) <- evalExp e1
+    (t2, _) <- evalExp e2
+    tmis <- typesMismatch pos t1 t2
+    when (tmis) $ throwSCError pos AssTypeMismatchError
+evalStmt (Incr pos exp) = do
+    (t, _) <- evalExp exp
+    when (t /= IntT) $ throwSCError pos $ NonIntegerIncrParamError exp
+evalStmt (Decr pos exp) = do
+    (t, _) <- evalExp exp
+    when (t /= IntT) $ throwSCError pos $ NonIntegerDecrParamError exp
 evalStmt (Ret pos exp) = do
     retT <- gets retT
     when (retT == VoidT) $ throwSCError pos NonVoidRetVoidFunError
     (expT, _) <- evalExp exp
-    when (retT /= expT) $ throwSCError pos $ RetTypeMismatchError retT expT
+    tmis <- typesMismatch pos retT expT
+    when (tmis) $ throwSCError pos $ RetTypeMismatchError retT expT
     modify (\s -> s {returned = True})
 evalStmt (VRet pos) = do
     retT <- gets retT
@@ -296,6 +300,27 @@ evalStmt (For pos t i exp stmt) = do
             when (ret) $ modify (\s -> s {returned = True})
         _ -> throwSCError pos $ NonIterableForError expT
 
+typesMismatch :: BNFC'Position -> VarT -> VarT -> SC Bool
+typesMismatch pos dt et = do
+    if dt == et then
+        return False
+    else
+        case (dt, et) of
+            (ClassT idt, ClassT iet) -> do 
+                ancestor <- classAncestor pos idt iet
+                return $ not ancestor
+            _ -> return True
+
+classAncestor :: BNFC'Position -> Ident -> Ident -> SC Bool
+classAncestor pos super c = do
+    ct <- getClsT pos c
+    case superName ct of
+        (Just p) -> if super == p then
+                return True
+            else 
+                classAncestor pos super p
+        _ -> return False
+
 evalBlockStmt :: Block -> SC ()
 evalBlockStmt (Block _ stmts) = evalStmtList stmts
 
@@ -331,7 +356,7 @@ evalTopDef (ClsDef pos ident stmts) = do
     mapM_ (\f -> do
         sandbox $ do
             modify (\s -> s {vEnv = cVEnv})
-            void $ storeVar pos (Ident "this") (ClassT ident)
+            void $ storeVar pos (Ident "self") (ClassT ident)
             evalFnDef f) [fnDef | (FnProp _ fnDef) <- stmts]
 evalTopDef (ClsExtDef pos ident super stmts) = do
     void $ getClassEnvs pos super

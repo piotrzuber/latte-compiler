@@ -12,6 +12,7 @@ LStr4:
 .string "OK"
 LStr5:
 .string "ERROR"
+
 main:
     pushl %ebp
     movl %esp, %ebp

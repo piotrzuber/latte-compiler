@@ -10,6 +10,7 @@ LStr3:
 .string "false"
 LStr4:
 .string "true"
+
 main:
     pushl %ebp
     movl %esp, %ebp

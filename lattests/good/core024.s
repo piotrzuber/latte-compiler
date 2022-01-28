@@ -4,6 +4,7 @@ LStr0:
 .string "yes"
 LStr1:
 .string "NOOO"
+
 main:
     pushl %ebp
     movl %esp, %ebp

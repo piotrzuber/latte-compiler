@@ -12,7 +12,7 @@ data VarT
     | NoneT 
     | StrT 
     | VoidT 
-    | ArrayT Type
+    | ArrayT VarT
     | ClassT Ident
     deriving Eq
 
@@ -21,8 +21,8 @@ instance Show VarT where
     show IntT = "int"
     show StrT = "string"
     show VoidT = "void"
-    show (ArrayT t) = "[" ++ (show (getVarTFromType t)) ++ "]"
-    show (ClassT i) = show i
+    show (ArrayT t) = "[" ++ (show  t) ++ "]"
+    show (ClassT i) = showIdent i
     show _ = "None"
     
 getVarTFromType :: Type -> VarT
@@ -30,7 +30,7 @@ getVarTFromType (Int _) = IntT
 getVarTFromType (Str _) = StrT
 getVarTFromType (Bool _) = BoolT
 getVarTFromType (Void _) = VoidT
-getVarTFromType (Array _ t) = ArrayT t
+getVarTFromType (Array _ t) = ArrayT $ getVarTFromType t
 getVarTFromType (ClsType _ i) = ClassT i
 getVarTFromType _ = NoneT
 
@@ -89,8 +89,8 @@ data SCError
     | MultipleVarDeclError VarId
     | NonBoolConditionError
     | NonEmptyMainArgsError
-    | NonIntegerDecrParamError VarId
-    | NonIntegerIncrParamError VarId
+    | NonIntegerDecrParamError Expr
+    | NonIntegerIncrParamError Expr
     | NonIntegerMinusParamError VarT VarT
     | NonIntegerMulParamError VarT VarT
     | NonVoidRetVoidFunError
@@ -130,8 +130,8 @@ instance Show SCError where
     show (MultipleVarDeclError v) = "Multiple variable " ++ showIdent v ++ " declaration in local scope"
     show NonBoolConditionError = "Non-boolean type of condition expression"
     show NonEmptyMainArgsError = "Unexpected parameters in main function declaration"
-    show (NonIntegerDecrParamError v) = "Non-integer type of decremented variable " ++ showIdent v
-    show (NonIntegerIncrParamError v) = "Non-integer type of incremented variable " ++ showIdent v
+    show (NonIntegerDecrParamError v) = "Non-integer type of decremented variable " ++ show v
+    show (NonIntegerIncrParamError v) = "Non-integer type of incremented variable " ++ show v
     show (NonIntegerMinusParamError g1 g2) = "Both subtraction parameters have to be integer, got :" ++ show g1 ++ ", " ++ show g2
     show (NonIntegerMulParamError g1 g2) = "Both multiplication parameters have to be integer, got :" ++ show g1 ++ ", " ++ show g2
     show NonVoidRetVoidFunError = "Non-void return from void type function"
@@ -149,10 +149,10 @@ instance Show SCError where
     show (DebugError v1 v2) = "DEBUG!!!! 1st: " ++ show v1 ++ " 2nd: " ++ show v2
     show ArrayIndexTypeMismatchError = "An index of an array must be an integer"
     show (ArrTypeMismatchError g) = "Subscripted value is not an array, got: " ++ show g
-    show (UnknownClassInitError i) = "Initialization of an object of an unknown class: " ++ show i
-    show (InvalidArrayAttrError i) = "An array has no attribute " ++ show i
-    show (UnknownClassAttributeError c a) = "No " ++ show a ++ " attribute for class " ++ show c
-    show (UnknownClassNameError i) = "Cannot find class " ++ show i
+    show (UnknownClassInitError i) = "Initialization of an object of an unknown class: " ++ showIdent i
+    show (InvalidArrayAttrError i) = "An array has no attribute " ++ showIdent i
+    show (UnknownClassAttributeError c a) = "No " ++ showIdent a ++ " attribute for class " ++ showIdent c
+    show (UnknownClassNameError i) = "Cannot find class " ++ showIdent i
     show (NonObjectTypeError t) = "Variable of type " ++ show t ++ " cannot have attributes"
     show (NonMethodTypeError t) = "Type " ++ show t ++ " cannot have methods"
     show (InvalidNullCastError) = "Invalid usage of null typecast"
